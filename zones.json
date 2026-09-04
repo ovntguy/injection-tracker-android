@@ -1,0 +1,59 @@
+{
+  "viewport": {
+    "width": 140,
+    "height": 220
+  },
+  "displayDotRadius": 1.75,
+  "selectCenterDotRadius": 1.5,
+  "hitTargetDp": 48,
+  "bodyFill": "#F3EDF7",
+  "displayStroke": "#CAC4D0",
+  "selectStroke": "#49454F",
+  "style": "exact-trace-athletic-contour",
+  "styleRef": "refs/human-contour-ref.jpg",
+  "notes": "Exact downsample of Deeeelay athletic contour ref (no approxPolyDP smoothing). Period dots only.",
+  "zones": [
+    {
+      "id": "left_upper_arm",
+      "label": "Left upper arm",
+      "cx": 46.1,
+      "cy": 80.6,
+      "displayDotRadius": 1.75
+    },
+    {
+      "id": "right_upper_arm",
+      "label": "Right upper arm",
+      "cx": 93.9,
+      "cy": 80.6,
+      "displayDotRadius": 1.75
+    },
+    {
+      "id": "left_stomach",
+      "label": "Left stomach",
+      "cx": 61.1,
+      "cy": 105.8,
+      "displayDotRadius": 1.75
+    },
+    {
+      "id": "right_stomach",
+      "label": "Right stomach",
+      "cx": 78.9,
+      "cy": 105.8,
+      "displayDotRadius": 1.75
+    },
+    {
+      "id": "left_upper_thigh",
+      "label": "Left upper thigh",
+      "cx": 60.2,
+      "cy": 147.8,
+      "displayDotRadius": 1.75
+    },
+    {
+      "id": "right_upper_thigh",
+      "label": "Right upper thigh",
+      "cx": 79.8,
+      "cy": 147.8,
+      "displayDotRadius": 1.75
+    }
+  ]
+}
