@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Injection Tracker</string>
+
+    <string name="nav_home">Home</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="setup_title">Set up your regimen</string>
+    <string name="setup_subtitle">Let\'s get started</string>
+    <string name="field_medicine_name">Medicine name</string>
+    <string name="field_dosage">Dosage</string>
+    <string name="field_frequency">Frequency</string>
+    <string name="field_start_date">Start date</string>
+    <string name="field_start_time">Start time</string>
+    <string name="field_date">Date</string>
+    <string name="field_time">Time</string>
+    <string name="action_save_and_continue">Save and continue</string>
+    <string name="action_save_changes">Save changes</string>
+    <string name="action_save_log">Save log</string>
+    <string name="action_log_injection">Log injection</string>
+    <string name="action_i_missed_it">I missed it</string>
+    <string name="action_edit_regimen">Edit regimen</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_log_missed">Log missed</string>
+    <string name="action_enable">Enable</string>
+    <string name="action_back">Back</string>
+    <string name="action_ok">OK</string>
+
+    <string name="frequency_every_week">Every week</string>
+    <string name="frequency_every_other_week">Every other week</string>
+
+    <string name="home_next_shot">Next shot</string>
+    <string name="home_overdue">Overdue</string>
+    <string name="home_last_site">Last site</string>
+    <string name="home_last_site_empty">Last site will show here after you log an injection.</string>
+    <string name="home_notif_denied">Notifications are off. Reminders won’t fire until you allow them.</string>
+    <string name="home_dose_frequency">%1$s · %2$s</string>
+
+    <string name="log_done_title">Log injection</string>
+    <string name="log_done_tap_site">Tap where you injected</string>
+    <string name="log_done_need_site">Select one injection site to save.</string>
+
+    <string name="missed_title">Mark this injection as missed?</string>
+    <string name="missed_body">Your next dose will be scheduled from now, not the original due time. No site is recorded.</string>
+
+    <string name="calendar_title">Calendar</string>
+    <string name="calendar_completed">Completed</string>
+    <string name="calendar_missed">Missed</string>
+    <string name="calendar_upcoming">Upcoming</string>
+    <string name="calendar_empty_day">No entries on this day.</string>
+    <string name="calendar_legend">Completed circle · Missed diamond · Upcoming outline</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_reminders">Reminders</string>
+    <string name="settings_day_before">Day before</string>
+    <string name="settings_day_before_support">Same clock as the injection, 24 hours earlier</string>
+    <string name="settings_at_time">At time</string>
+    <string name="settings_at_time_support">When the next injection is due</string>
+    <string name="settings_regimen">Regimen</string>
+
+    <string name="edit_regimen_title">Edit regimen</string>
+
+    <string name="notif_channel_name">Injection reminders</string>
+    <string name="notif_channel_desc">Day-before and at-time injection reminders</string>
+    <string name="notif_day_before_title">Injection tomorrow</string>
+    <string name="notif_day_before_text">%1$s is due tomorrow at %2$s</string>
+    <string name="notif_at_time_title">Time for your injection</string>
+    <string name="notif_at_time_text">%1$s %2$s is due now</string>
+
+    <string name="site_left_upper_arm">Left upper arm</string>
+    <string name="site_right_upper_arm">Right upper arm</string>
+    <string name="site_left_stomach">Left stomach</string>
+    <string name="site_right_stomach">Right stomach</string>
+    <string name="site_left_upper_thigh">Left upper thigh</string>
+    <string name="site_right_upper_thigh">Right upper thigh</string>
+
+    <string name="error_required">Required</string>
+</resources>

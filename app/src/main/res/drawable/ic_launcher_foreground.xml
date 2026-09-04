@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Simplified syringe on the adaptive-icon safe zone -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,26 C55.2,26 56.2,26.9 56.4,28.1 L58.5,42.2 L64.8,36.9 L67,39.1 L60.2,45.9 L62.4,60.4 C62.6,61.6 61.8,62.8 60.6,63.2 L56.4,64.6 L70.2,78.4 C71.4,79.6 71.4,81.6 70.2,82.8 L68.8,84.2 C67.6,85.4 65.6,85.4 64.4,84.2 L50.6,70.4 L49.2,74.6 C48.8,75.8 47.6,76.6 46.4,76.4 L31.9,74.2 L25.1,81 L22.9,78.8 L29.2,72.5 L43.3,70.4 C44.5,70.2 45.4,69.2 45.4,68 L45.4,54.2 L32.1,40.9 C30.9,39.7 30.9,37.7 32.1,36.5 L33.5,35.1 C34.7,33.9 36.7,33.9 37.9,35.1 L51.2,48.4 L52.6,39.6 C52.8,38.4 53.8,37.4 55,37.4 Z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M49.5,79.5 L46,83 L51,88 L54.5,84.5 Z" />
+</vector>
