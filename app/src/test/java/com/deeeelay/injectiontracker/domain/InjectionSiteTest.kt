@@ -21,6 +21,18 @@ class InjectionSiteTest {
     }
 
     @Test
+    fun zoneIdsMatchLockedDrawableBasenames() {
+        assertThat(InjectionSite.LEFT_UPPER_ARM.zoneId).isEqualTo("left_upper_arm")
+        assertThat(InjectionSite.RIGHT_UPPER_ARM.zoneId).isEqualTo("right_upper_arm")
+        assertThat(InjectionSite.LEFT_STOMACH.zoneId).isEqualTo("left_stomach")
+        assertThat(InjectionSite.RIGHT_STOMACH.zoneId).isEqualTo("right_stomach")
+        assertThat(InjectionSite.LEFT_UPPER_THIGH.zoneId).isEqualTo("left_upper_thigh")
+        assertThat(InjectionSite.RIGHT_UPPER_THIGH.zoneId).isEqualTo("right_upper_thigh")
+        val ids = InjectionSite.entries.map { it.zoneId }
+        assertThat(ids).containsNoDuplicates()
+    }
+
+    @Test
     fun nearestPicksLeftStomachAroundItsCenter() {
         val site = InjectionSite.nearest(61.1f, 105.8f, maxDistance = 24f)
         assertThat(site).isEqualTo(InjectionSite.LEFT_STOMACH)

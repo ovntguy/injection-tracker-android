@@ -7,13 +7,14 @@ package com.deeeelay.injectiontracker.domain
 enum class InjectionSite(
     val viewportX: Float,
     val viewportY: Float,
+    val zoneId: String,
 ) {
-    LEFT_UPPER_ARM(46.1f, 80.6f),
-    RIGHT_UPPER_ARM(93.9f, 80.6f),
-    LEFT_STOMACH(61.1f, 105.8f),
-    RIGHT_STOMACH(78.9f, 105.8f),
-    LEFT_UPPER_THIGH(60.2f, 147.8f),
-    RIGHT_UPPER_THIGH(79.8f, 147.8f),
+    LEFT_UPPER_ARM(46.1f, 80.6f, "left_upper_arm"),
+    RIGHT_UPPER_ARM(93.9f, 80.6f, "right_upper_arm"),
+    LEFT_STOMACH(61.1f, 105.8f, "left_stomach"),
+    RIGHT_STOMACH(78.9f, 105.8f, "right_stomach"),
+    LEFT_UPPER_THIGH(60.2f, 147.8f, "left_upper_thigh"),
+    RIGHT_UPPER_THIGH(79.8f, 147.8f, "right_upper_thigh"),
     ;
 
     companion object {

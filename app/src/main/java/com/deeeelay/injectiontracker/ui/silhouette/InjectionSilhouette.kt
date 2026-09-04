@@ -1,6 +1,7 @@
 package com.deeeelay.injectiontracker.ui.silhouette
 
-import androidx.compose.foundation.Canvas
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -9,36 +10,43 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.vector.PathParser
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.domain.InjectionSite
-import com.deeeelay.injectiontracker.ui.theme.BodyFill
-import com.deeeelay.injectiontracker.ui.theme.DisplayStroke
-import com.deeeelay.injectiontracker.ui.theme.Primary
-import com.deeeelay.injectiontracker.ui.theme.SelectStroke
 
 enum class SilhouetteMode { Display, Select }
 
-private const val VIEWPORT_W = 140f
-private const val VIEWPORT_H = 220f
-private const val DISPLAY_DOT_RADIUS = 1.75f
-private const val SELECT_DOT_RADIUS = 1.5f
+private const val VIEWPORT_W = InjectionSite.VIEWPORT_WIDTH
+private const val VIEWPORT_H = InjectionSite.VIEWPORT_HEIGHT
 private val MinHitTarget = 48.dp
+
+@DrawableRes
+fun InjectionSite.displayDrawableRes(): Int = when (this) {
+    InjectionSite.LEFT_UPPER_ARM -> R.drawable.silhouette_display_left_upper_arm
+    InjectionSite.RIGHT_UPPER_ARM -> R.drawable.silhouette_display_right_upper_arm
+    InjectionSite.LEFT_STOMACH -> R.drawable.silhouette_display_left_stomach
+    InjectionSite.RIGHT_STOMACH -> R.drawable.silhouette_display_right_stomach
+    InjectionSite.LEFT_UPPER_THIGH -> R.drawable.silhouette_display_left_upper_thigh
+    InjectionSite.RIGHT_UPPER_THIGH -> R.drawable.silhouette_display_right_upper_thigh
+}
+
+@DrawableRes
+fun InjectionSite.selectDrawableRes(): Int = when (this) {
+    InjectionSite.LEFT_UPPER_ARM -> R.drawable.silhouette_select_left_upper_arm
+    InjectionSite.RIGHT_UPPER_ARM -> R.drawable.silhouette_select_right_upper_arm
+    InjectionSite.LEFT_STOMACH -> R.drawable.silhouette_select_left_stomach
+    InjectionSite.RIGHT_STOMACH -> R.drawable.silhouette_select_right_stomach
+    InjectionSite.LEFT_UPPER_THIGH -> R.drawable.silhouette_select_left_upper_thigh
+    InjectionSite.RIGHT_UPPER_THIGH -> R.drawable.silhouette_select_right_upper_thigh
+}
 
 @Composable
 fun InjectionSilhouette(
@@ -47,12 +55,18 @@ fun InjectionSilhouette(
     markedSite: InjectionSite? = null,
     onSiteSelected: ((InjectionSite) -> Unit)? = null,
 ) {
-    val path = remember {
-        PathParser().parsePathString(SILHOUETTE_PATH_DATA).toPath()
+    val drawableRes = when (mode) {
+        SilhouetteMode.Display ->
+            markedSite?.displayDrawableRes() ?: R.drawable.silhouette_display_empty
+        SilhouetteMode.Select ->
+            markedSite?.selectDrawableRes() ?: R.drawable.silhouette_select_unselected
     }
-    val stroke = if (mode == SilhouetteMode.Display) DisplayStroke else SelectStroke
-    val dotRadius = if (mode == SilhouetteMode.Display) DISPLAY_DOT_RADIUS else SELECT_DOT_RADIUS
     val density = LocalDensity.current
+    val imageDescription = when {
+        markedSite != null -> siteLabel(markedSite)
+        mode == SilhouetteMode.Display -> stringResource(R.string.home_last_site)
+        else -> stringResource(R.string.log_done_tap_site)
+    }
 
     BoxWithConstraints(modifier = modifier) {
         val scale = minOf(
@@ -65,12 +79,11 @@ fun InjectionSilhouette(
         val heightDp = with(density) { heightPx.toDp() }
 
         Box(Modifier.size(widthDp, heightDp)) {
-            SilhouetteCanvas(
+            Image(
+                painter = painterResource(drawableRes),
+                contentDescription = imageDescription,
                 modifier = Modifier.fillMaxSize(),
-                path = path,
-                stroke = stroke,
-                markedSite = markedSite,
-                dotRadiusViewport = dotRadius,
+                contentScale = ContentScale.Fit,
             )
             if (mode == SilhouetteMode.Select && onSiteSelected != null) {
                 InjectionSite.entries.forEach { site ->
@@ -86,39 +99,6 @@ fun InjectionSilhouette(
                             .clickable { onSiteSelected(site) },
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SilhouetteCanvas(
-    modifier: Modifier,
-    path: Path,
-    stroke: Color,
-    markedSite: InjectionSite?,
-    dotRadiusViewport: Float,
-) {
-    Canvas(modifier) {
-        val sx = size.width / VIEWPORT_W
-        val sy = size.height / VIEWPORT_H
-        scale(sx, sy, pivot = Offset.Zero) {
-            drawPath(path = path, color = BodyFill)
-            drawPath(
-                path = path,
-                color = stroke,
-                style = Stroke(
-                    width = 1.25f,
-                    cap = StrokeCap.Round,
-                    join = StrokeJoin.Round,
-                ),
-            )
-            if (markedSite != null) {
-                drawCircle(
-                    color = Primary,
-                    radius = dotRadiusViewport,
-                    center = Offset(markedSite.viewportX, markedSite.viewportY),
-                )
             }
         }
     }

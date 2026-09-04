@@ -1,0 +1,38 @@
+{
+  "viewportWidth": 140,
+  "viewportHeight": 220,
+  "displayDotRadius": 1.75,
+  "selectCenterDotRadius": 1.5,
+  "zones": [
+    {
+      "id": "left_upper_arm",
+      "x": 46.1,
+      "y": 80.6
+    },
+    {
+      "id": "right_upper_arm",
+      "x": 93.9,
+      "y": 80.6
+    },
+    {
+      "id": "left_stomach",
+      "x": 61.1,
+      "y": 105.8
+    },
+    {
+      "id": "right_stomach",
+      "x": 78.9,
+      "y": 105.8
+    },
+    {
+      "id": "left_upper_thigh",
+      "x": 60.2,
+      "y": 147.8
+    },
+    {
+      "id": "right_upper_thigh",
+      "x": 79.8,
+      "y": 147.8
+    }
+  ]
+}
