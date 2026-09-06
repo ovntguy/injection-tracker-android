@@ -70,6 +70,28 @@ class SilhouetteDrawableTest {
         }
     }
 
+    @Test
+    fun zoneDotsUseLockedV2Centers() {
+        val dir = drawableDir()
+        InjectionSite.entries.forEach { site ->
+            val display = File(dir, "silhouette_display_${site.zoneId}.xml").readText()
+            val select = File(dir, "silhouette_select_${site.zoneId}.xml").readText()
+            val displayStartX = site.viewportX - InjectionSite.DISPLAY_DOT_RADIUS
+            val selectStartX = site.viewportX - InjectionSite.SELECT_CENTER_DOT_RADIUS
+            assertThat(display).contains("${fmt(displayStartX)},${fmt(site.viewportY)}")
+            assertThat(select).contains("${fmt(selectStartX)},${fmt(site.viewportY)}")
+        }
+    }
+
+    private fun fmt(value: Float): String {
+        val tenths = value * 10f
+        return if (tenths == tenths.toInt().toFloat()) {
+            "%.1f".format(value)
+        } else {
+            "%.2f".format(value).trimEnd('0').trimEnd('.')
+        }
+    }
+
     private fun drawableDir(): File {
         val candidates = listOf(
             File("app/src/main/res/drawable"),
