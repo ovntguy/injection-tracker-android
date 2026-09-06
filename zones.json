@@ -3,57 +3,215 @@
     "width": 140,
     "height": 220
   },
+  "zoneCount": 18,
   "displayDotRadius": 1.75,
   "selectCenterDotRadius": 1.5,
   "hitTargetDp": 48,
   "bodyFill": "#F3EDF7",
   "displayStroke": "#CAC4D0",
   "selectStroke": "#49454F",
+  "hitRegionsLocked": true,
   "style": "exact-trace-athletic-contour",
   "styleRef": "refs/human-contour-ref.jpg",
-  "notes": "Exact downsample of Deeeelay athletic contour ref (no approxPolyDP smoothing). Period dots only.",
+  "notes": "18-zone lock. Same exact-trace outline pathData as silhouette_display_empty.xml. Period dots only. Nearest-center hit >=48dp from JSON cx/cy.",
   "zones": [
     {
-      "id": "left_upper_arm",
-      "label": "Left upper arm",
-      "cx": 46.1,
-      "cy": 80.6,
-      "displayDotRadius": 1.75
+      "id": "left_upper_arm_proximal",
+      "label": "Left upper arm proximal",
+      "cx": 46.9,
+      "cy": 68.0,
+      "bands": {
+        "side": "left",
+        "region": "upper_arm",
+        "band": "proximal"
+      }
     },
     {
-      "id": "right_upper_arm",
-      "label": "Right upper arm",
-      "cx": 93.9,
-      "cy": 80.6,
-      "displayDotRadius": 1.75
+      "id": "left_upper_arm_mid",
+      "label": "Left upper arm mid",
+      "cx": 45.1,
+      "cy": 84.8,
+      "bands": {
+        "side": "left",
+        "region": "upper_arm",
+        "band": "mid"
+      }
     },
     {
-      "id": "left_stomach",
-      "label": "Left stomach",
-      "cx": 61.1,
-      "cy": 105.8,
-      "displayDotRadius": 1.75
+      "id": "left_upper_arm_distal",
+      "label": "Left upper arm distal",
+      "cx": 43.5,
+      "cy": 101.6,
+      "bands": {
+        "side": "left",
+        "region": "upper_arm",
+        "band": "distal"
+      }
     },
     {
-      "id": "right_stomach",
-      "label": "Right stomach",
+      "id": "right_upper_arm_proximal",
+      "label": "Right upper arm proximal",
+      "cx": 93.2,
+      "cy": 68.0,
+      "bands": {
+        "side": "right",
+        "region": "upper_arm",
+        "band": "proximal"
+      }
+    },
+    {
+      "id": "right_upper_arm_mid",
+      "label": "Right upper arm mid",
+      "cx": 94.9,
+      "cy": 84.8,
+      "bands": {
+        "side": "right",
+        "region": "upper_arm",
+        "band": "mid"
+      }
+    },
+    {
+      "id": "right_upper_arm_distal",
+      "label": "Right upper arm distal",
+      "cx": 96.8,
+      "cy": 101.6,
+      "bands": {
+        "side": "right",
+        "region": "upper_arm",
+        "band": "distal"
+      }
+    },
+    {
+      "id": "left_abdomen_proximal",
+      "label": "Left abdomen proximal",
+      "cx": 60.1,
+      "cy": 93.2,
+      "bands": {
+        "side": "left",
+        "region": "abdomen",
+        "band": "proximal"
+      }
+    },
+    {
+      "id": "left_abdomen_mid",
+      "label": "Left abdomen mid",
+      "cx": 59.6,
+      "cy": 110.0,
+      "bands": {
+        "side": "left",
+        "region": "abdomen",
+        "band": "mid"
+      }
+    },
+    {
+      "id": "left_abdomen_distal",
+      "label": "Left abdomen distal",
+      "cx": 59.7,
+      "cy": 126.8,
+      "bands": {
+        "side": "left",
+        "region": "abdomen",
+        "band": "distal"
+      }
+    },
+    {
+      "id": "right_abdomen_proximal",
+      "label": "Right abdomen proximal",
+      "cx": 79.9,
+      "cy": 93.2,
+      "bands": {
+        "side": "right",
+        "region": "abdomen",
+        "band": "proximal"
+      }
+    },
+    {
+      "id": "right_abdomen_mid",
+      "label": "Right abdomen mid",
+      "cx": 80.4,
+      "cy": 110.0,
+      "bands": {
+        "side": "right",
+        "region": "abdomen",
+        "band": "mid"
+      }
+    },
+    {
+      "id": "right_abdomen_distal",
+      "label": "Right abdomen distal",
+      "cx": 80.3,
+      "cy": 126.8,
+      "bands": {
+        "side": "right",
+        "region": "abdomen",
+        "band": "distal"
+      }
+    },
+    {
+      "id": "left_upper_thigh_proximal",
+      "label": "Left upper thigh proximal",
+      "cx": 60.7,
+      "cy": 139.4,
+      "bands": {
+        "side": "left",
+        "region": "upper_thigh",
+        "band": "proximal"
+      }
+    },
+    {
+      "id": "left_upper_thigh_mid",
+      "label": "Left upper thigh mid",
+      "cx": 61.4,
+      "cy": 156.2,
+      "bands": {
+        "side": "left",
+        "region": "upper_thigh",
+        "band": "mid"
+      }
+    },
+    {
+      "id": "left_upper_thigh_distal",
+      "label": "Left upper thigh distal",
+      "cx": 61.3,
+      "cy": 173.0,
+      "bands": {
+        "side": "left",
+        "region": "upper_thigh",
+        "band": "distal"
+      }
+    },
+    {
+      "id": "right_upper_thigh_proximal",
+      "label": "Right upper thigh proximal",
+      "cx": 79.4,
+      "cy": 139.4,
+      "bands": {
+        "side": "right",
+        "region": "upper_thigh",
+        "band": "proximal"
+      }
+    },
+    {
+      "id": "right_upper_thigh_mid",
+      "label": "Right upper thigh mid",
+      "cx": 78.7,
+      "cy": 156.2,
+      "bands": {
+        "side": "right",
+        "region": "upper_thigh",
+        "band": "mid"
+      }
+    },
+    {
+      "id": "right_upper_thigh_distal",
+      "label": "Right upper thigh distal",
       "cx": 78.9,
-      "cy": 105.8,
-      "displayDotRadius": 1.75
-    },
-    {
-      "id": "left_upper_thigh",
-      "label": "Left upper thigh",
-      "cx": 60.2,
-      "cy": 147.8,
-      "displayDotRadius": 1.75
-    },
-    {
-      "id": "right_upper_thigh",
-      "label": "Right upper thigh",
-      "cx": 79.8,
-      "cy": 147.8,
-      "displayDotRadius": 1.75
+      "cy": 173.0,
+      "bands": {
+        "side": "right",
+        "region": "upper_thigh",
+        "band": "distal"
+      }
     }
   ]
 }

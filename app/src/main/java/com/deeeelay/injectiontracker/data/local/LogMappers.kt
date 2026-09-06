@@ -10,7 +10,7 @@ fun InjectionLogEntity.toDomain(): InjectionLog =
         id = id,
         type = LogType.valueOf(type),
         loggedAt = Instant.ofEpochMilli(loggedAtEpochMillis),
-        site = site?.let { InjectionSite.valueOf(it) },
+        site = InjectionSite.fromPersistedName(site),
     )
 
 fun InjectionLog.toEntity(): InjectionLogEntity =
