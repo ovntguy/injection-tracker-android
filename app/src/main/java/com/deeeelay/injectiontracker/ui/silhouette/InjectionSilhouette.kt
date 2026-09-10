@@ -28,7 +28,7 @@ private const val VIEWPORT_W = InjectionSite.VIEWPORT_WIDTH
 private const val VIEWPORT_H = InjectionSite.VIEWPORT_HEIGHT
 private val MinHitTarget = InjectionSite.HIT_TARGET_DP.dp
 
-/** Locked VectorDrawable resource for Home display / Log Done select. Period dots are in the VDs. */
+/** Locked VectorDrawable resource for Home display / Log Done select. Period dots are in the VDs. Visual NO-OP in v1.1 — filenames follow anatomical L↔R ids. */
 @DrawableRes
 fun silhouetteDrawableRes(mode: SilhouetteMode, site: InjectionSite?): Int {
     return when (mode) {

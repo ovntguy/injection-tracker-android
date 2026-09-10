@@ -68,24 +68,24 @@
     <string name="notif_at_time_title">Time for your injection</string>
     <string name="notif_at_time_text">%1$s %2$s is due now</string>
 
-    <string name="site_left_upper_arm_proximal">Left upper arm proximal</string>
-    <string name="site_left_upper_arm_mid">Left upper arm mid</string>
-    <string name="site_left_upper_arm_distal">Left upper arm distal</string>
-    <string name="site_right_upper_arm_proximal">Right upper arm proximal</string>
-    <string name="site_right_upper_arm_mid">Right upper arm mid</string>
-    <string name="site_right_upper_arm_distal">Right upper arm distal</string>
-    <string name="site_left_abdomen_proximal">Left abdomen proximal</string>
-    <string name="site_left_abdomen_mid">Left abdomen mid</string>
-    <string name="site_left_abdomen_distal">Left abdomen distal</string>
-    <string name="site_right_abdomen_proximal">Right abdomen proximal</string>
-    <string name="site_right_abdomen_mid">Right abdomen mid</string>
-    <string name="site_right_abdomen_distal">Right abdomen distal</string>
-    <string name="site_left_upper_thigh_proximal">Left upper thigh proximal</string>
-    <string name="site_left_upper_thigh_mid">Left upper thigh mid</string>
-    <string name="site_left_upper_thigh_distal">Left upper thigh distal</string>
-    <string name="site_right_upper_thigh_proximal">Right upper thigh proximal</string>
-    <string name="site_right_upper_thigh_mid">Right upper thigh mid</string>
-    <string name="site_right_upper_thigh_distal">Right upper thigh distal</string>
+    <string name="site_left_upper_arm_proximal">Left upper arm (high)</string>
+    <string name="site_left_upper_arm_mid">Left upper arm (mid)</string>
+    <string name="site_left_upper_arm_distal">Left upper arm (low)</string>
+    <string name="site_right_upper_arm_proximal">Right upper arm (high)</string>
+    <string name="site_right_upper_arm_mid">Right upper arm (mid)</string>
+    <string name="site_right_upper_arm_distal">Right upper arm (low)</string>
+    <string name="site_left_abdomen_proximal">Left abdomen (upper)</string>
+    <string name="site_left_abdomen_mid">Left abdomen (mid)</string>
+    <string name="site_left_abdomen_distal">Left abdomen (lower)</string>
+    <string name="site_right_abdomen_proximal">Right abdomen (upper)</string>
+    <string name="site_right_abdomen_mid">Right abdomen (mid)</string>
+    <string name="site_right_abdomen_distal">Right abdomen (lower)</string>
+    <string name="site_left_upper_thigh_proximal">Left thigh (high)</string>
+    <string name="site_left_upper_thigh_mid">Left thigh (mid)</string>
+    <string name="site_left_upper_thigh_distal">Left thigh (low)</string>
+    <string name="site_right_upper_thigh_proximal">Right thigh (high)</string>
+    <string name="site_right_upper_thigh_mid">Right thigh (mid)</string>
+    <string name="site_right_upper_thigh_distal">Right thigh (low)</string>
 
     <string name="error_required">Required</string>
 </resources>
