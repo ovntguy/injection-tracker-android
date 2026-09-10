@@ -19,6 +19,7 @@ class InjectionTrackerApp : Application() {
         container = AppContainer(this)
         ReminderReceiver.ensureChannel(this)
         applicationScope.launch {
+            container.preferences.migrateLeftRightSiteIdsIfNeeded()
             container.repository.rescheduleFromStorage()
         }
     }

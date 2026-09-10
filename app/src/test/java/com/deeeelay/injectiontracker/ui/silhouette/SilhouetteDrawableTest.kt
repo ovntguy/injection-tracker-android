@@ -10,18 +10,18 @@ class SilhouetteDrawableTest {
     fun displayEmptyAndLastSiteMapToLockedDrawableNames() {
         assertThat(silhouetteDrawableName(SilhouetteMode.Display, null))
             .isEqualTo("silhouette_display_empty")
-        assertThat(silhouetteDrawableName(SilhouetteMode.Display, InjectionSite.LEFT_ABDOMEN_MID))
-            .isEqualTo("silhouette_display_left_abdomen_mid")
-        assertThat(silhouetteDrawableName(SilhouetteMode.Display, InjectionSite.RIGHT_UPPER_ARM_DISTAL))
-            .isEqualTo("silhouette_display_right_upper_arm_distal")
+        assertThat(silhouetteDrawableName(SilhouetteMode.Display, InjectionSite.RIGHT_ABDOMEN_MID))
+            .isEqualTo("silhouette_display_right_abdomen_mid")
+        assertThat(silhouetteDrawableName(SilhouetteMode.Display, InjectionSite.LEFT_UPPER_ARM_DISTAL))
+            .isEqualTo("silhouette_display_left_upper_arm_distal")
     }
 
     @Test
     fun selectUnselectedAndZoneMapToLockedDrawableNames() {
         assertThat(silhouetteDrawableName(SilhouetteMode.Select, null))
             .isEqualTo("silhouette_select_unselected")
-        assertThat(silhouetteDrawableName(SilhouetteMode.Select, InjectionSite.LEFT_UPPER_THIGH_PROXIMAL))
-            .isEqualTo("silhouette_select_left_upper_thigh_proximal")
+        assertThat(silhouetteDrawableName(SilhouetteMode.Select, InjectionSite.RIGHT_UPPER_THIGH_PROXIMAL))
+            .isEqualTo("silhouette_select_right_upper_thigh_proximal")
     }
 
     @Test
@@ -68,6 +68,17 @@ class SilhouetteDrawableTest {
                 assertThat(text).contains("1.5,1.5")
             }
         }
+    }
+
+    @Test
+    fun anatomicalRightDrawablesKeepScreenLeftCenters() {
+        val dir = drawableDir()
+        val rightMid = File(dir, "silhouette_display_right_abdomen_mid.xml").readText()
+        val leftMid = File(dir, "silhouette_display_left_abdomen_mid.xml").readText()
+        assertThat(rightMid).contains("57.75,105.0")
+        assertThat(leftMid).contains("78.75,105.0")
+        assertThat(InjectionSite.RIGHT_ABDOMEN_MID.viewportX).isEqualTo(59.5f)
+        assertThat(InjectionSite.LEFT_ABDOMEN_MID.viewportX).isEqualTo(80.5f)
     }
 
     @Test
