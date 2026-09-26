@@ -4,7 +4,7 @@
 
 Personal, local-first Android app for a single recurring injectable (every week or every other week).
 
-This repository previously held only a placeholder README. The Android app lives at the **repo root** (standard Gradle project).
+The Android app lives at the **repo root** (standard Gradle project).
 
 ## Open in Android Studio
 
