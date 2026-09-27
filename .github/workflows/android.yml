@@ -19,8 +19,6 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: |
-            platform-tools
-            cmdline-tools;latest
+          packages: platform-tools
       - name: Unit tests and debug APK
         run: ./gradlew :app:test :app:assembleDebug --stacktrace
