@@ -30,4 +30,4 @@ export ANDROID_HOME="$HOME/Android/Sdk"   # or the SDK you installed
 
 Debug APK: `app/build/outputs/apk/debug/app-debug.apk`.
 
-The car session picks the nearest WSR-88D to downtown Denver (KFTG) until a real location source is wired. Houston resolves to KHGX in the unit test.
+The car session picks the nearest WSR-88D to Birmingham, Alabama (33.5186, -86.8104), which is KBMX (Alabaster). That observer is a demo hard-code, not live GPS. Houston resolves to KHGX in the unit test.

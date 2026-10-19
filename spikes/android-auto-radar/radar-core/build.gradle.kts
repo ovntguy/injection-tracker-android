@@ -29,4 +29,8 @@ tasks.register<JavaExec>("renderProof") {
     classpath = sourceSets["test"].runtimeClasspath
     mainClass.set("com.deeeelay.aaradar.spike.ProofMain")
     workingDir = rootProject.projectDir
+    val proofArgs = providers.gradleProperty("proofArgs")
+    if (proofArgs.isPresent) {
+        args(proofArgs.get().split(Regex("\\s+")))
+    }
 }

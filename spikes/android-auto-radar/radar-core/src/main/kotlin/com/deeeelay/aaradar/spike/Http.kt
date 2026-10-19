@@ -12,9 +12,9 @@ import java.net.URI
 const val SPIKE_USER_AGENT =
     "BigDawgAaRadarSpike/0.1 (personal sideload feasibility; single OSM tile)"
 
-/** Downtown Denver. Nearest WSR-88D in the bundled catalog is KFTG. */
-const val DEFAULT_LATITUDE = 39.7392
-const val DEFAULT_LONGITUDE = -104.9903
+/** Birmingham, Alabama. Demo hard-code, not live GPS. Nearest WSR-88D is KBMX (Alabaster). */
+const val DEFAULT_LATITUDE = 33.5186
+const val DEFAULT_LONGITUDE = -86.8104
 
 fun httpGet(url: String): ByteArray {
     val connection = URI(url).toURL().openConnection() as HttpURLConnection

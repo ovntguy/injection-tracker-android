@@ -6,11 +6,11 @@ Recorded 2026-10-19 from `:radar-core:renderProof` and `:app:assembleDebug`. Mac
 
 **PASS (build + same-renderer PNG). DHU not executed.**
 
-- Product: N0B, code 153, super-res base reflectivity. 720 radials × 1840 bins × 0.25 km. Scan `2026-10-19T16:54:47Z`.
-- Source: `https://unidata-nexrad-level3.s3.amazonaws.com/FTG_N0B_2026_10_19_16_54_47` (public Unidata bucket, no credentials). tgftp `DS.00n0b` only listed a handful of sites and returned 403 for KFTG `sn.last`. N0Q `DS.p94r0/SI.{site}/sn.last` on tgftp is the fallback in `NexradClient`.
-- Nearest site to the default Denver point is KFTG (Front Range Airport). Decoder is original packet-16 code, not wX.
-- One OSM tile, `https://tile.openstreetmap.org/5/6/12.png`, is drawn under the sweep. Attribution is on the PNG.
-- Proof: `local-nexrad-reflectivity.png` (207992 echo pixels). `RadarScreen` calls the same `RadarCompositor.compose`, then `Surface.lockCanvas` / `drawText` for the scan time. The pane row shows that time too.
+- Product: N0B, code 153, super-res base reflectivity. 720 radials × 1840 bins × 0.25 km. Scan `2026-10-19T17:21:42Z`.
+- Source: `https://unidata-nexrad-level3.s3.amazonaws.com/BMX_N0B_2026_10_19_17_21_42` (public Unidata bucket, no credentials). N0Q `DS.p94r0/SI.{site}/sn.last` on tgftp is the fallback in `NexradClient`.
+- Nearest site to the hard-coded Birmingham observer (33.5186N, 86.8104W) is KBMX (Alabaster, about 33.172N, 86.770W). Decoder is original packet-16 code, not wX.
+- One OSM tile, `https://tile.openstreetmap.org/5/8/12.png`, is drawn under the sweep. Attribution is on the PNG.
+- Proof: `local-nexrad-reflectivity.png` (222802 echo pixels). `RadarScreen` calls the same `RadarCompositor.compose`, then `Surface.lockCanvas` / `drawText` for the scan time. The pane row shows that time too.
 - Blocker: no phone, emulator image, or Desktop Head Unit in this environment, so the surface was not driven inside DHU. Steps are in `../SETUP.md`.
 
 ## B — National MRMS composite reflectivity
@@ -44,4 +44,4 @@ Merged debug manifest contains:
 
 ## Not done
 
-Loop UI, phone settings, Play, Level 2, RIDGE2, velocity, live car location (Denver is hard-coded as the observer).
+Loop UI, phone settings, Play, Level 2, RIDGE2, velocity, live car location (Birmingham is hard-coded as the observer).

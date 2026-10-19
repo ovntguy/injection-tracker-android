@@ -13,8 +13,8 @@ class NexradLevel3Test {
         val frame = NexradLevel3.decode(syntheticN0q())
         assertEquals(94, frame.productCode)
         assertEquals("N0Q", frame.productName)
-        assertEquals(39.786, frame.latitude, 0.0001)
-        assertEquals(-104.546, frame.longitude, 0.0001)
+        assertEquals(33.172, frame.latitude, 0.0001)
+        assertEquals(-86.770, frame.longitude, 0.0001)
         assertEquals(Instant.parse("1970-01-02T01:01:01Z"), frame.scanTime)
         assertEquals(1.0, frame.gateKm, 0.0001)
         assertEquals(4, frame.binCount)
@@ -46,8 +46,8 @@ class NexradLevel3Test {
         message.putShort(0)
         message.putShort(3)
         message.putShort(-1)
-        message.putInt(39786)
-        message.putInt(-104546)
+        message.putInt(33172)
+        message.putInt(-86770)
         message.putShort(5000)
         message.putShort(94)
         message.putShort(1)
@@ -96,10 +96,10 @@ class NexradLevel3Test {
 
 class CatalogAndWmsTest {
     @Test
-    fun nearestWsr88dForDenverAndHouston() {
+    fun nearestWsr88dForBirminghamAndHouston() {
         val sites = NexradCatalog.load()
         assertTrue(sites.size > 100)
-        assertEquals("KFTG", NexradCatalog.nearest(sites, DEFAULT_LATITUDE, DEFAULT_LONGITUDE).id)
+        assertEquals("KBMX", NexradCatalog.nearest(sites, DEFAULT_LATITUDE, DEFAULT_LONGITUDE).id)
         assertEquals("KHGX", NexradCatalog.nearest(sites, 29.7604, -95.3698).id)
     }
 
@@ -107,11 +107,11 @@ class CatalogAndWmsTest {
     fun latestS3KeyIsLexicographicMax() {
         val xml = """
             <ListBucketResult>
-              <Contents><Key>FTG_N0B_2026_10_19_16_33_39</Key></Contents>
-              <Contents><Key>FTG_N0B_2026_10_19_16_40_42</Key></Contents>
+              <Contents><Key>BMX_N0B_2026_10_19_16_33_39</Key></Contents>
+              <Contents><Key>BMX_N0B_2026_10_19_16_40_42</Key></Contents>
             </ListBucketResult>
         """.trimIndent()
-        assertEquals("FTG_N0B_2026_10_19_16_40_42", NexradClient().latestKey(xml))
+        assertEquals("BMX_N0B_2026_10_19_16_40_42", NexradClient().latestKey(xml))
     }
 
     @Test
@@ -135,10 +135,10 @@ class RadarCompositorTest {
     @Test
     fun paintsEchoAtRadarCenter() {
         val frame = ReflectivityFrame(
-            siteId = "FTG",
+            siteId = "BMX",
             productCode = 153,
-            latitude = 39.786,
-            longitude = -104.546,
+            latitude = 33.172,
+            longitude = -86.770,
             scanTime = Instant.EPOCH,
             gateKm = 20.0,
             binCount = 4,

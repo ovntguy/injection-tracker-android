@@ -14,7 +14,7 @@ Debug builds accept any Android Auto host (`HostValidator.ALLOW_ALL_HOSTS_VALIDA
 
 The session always shows the latest reflectivity frame and its scan time. It does not loop. The product rule "loop only when parked" is not implemented here.
 
-The default observer is downtown Denver (39.7392, -104.9903), so the nearest WSR-88D is KFTG. There is no phone location UI in this spike.
+The default observer is Birmingham, Alabama (33.5186, -86.8104), so the nearest WSR-88D is KBMX (Alabaster, about 33.172N, 86.770W). That point is a demo hard-code, not live GPS. There is no phone location UI in this spike.
 
 ## 1. Phone prerequisites
 
@@ -66,7 +66,7 @@ cd "$ANDROID_HOME/extras/google/auto"
 ./desktop-head-unit
 ```
 
-Accept the Android Auto prompts on the phone the first time. In the DHU launcher, open **Radar Spike**. The template title is Reflectivity. The map area is the `SurfaceCallback` drawing KFTG N0B (or N0Q if N0B is missing) plus the scan time. The pane repeats the scan time.
+Accept the Android Auto prompts on the phone the first time. In the DHU launcher, open **Radar Spike**. The template title is Reflectivity. The map area is the `SurfaceCallback` drawing KBMX N0B (or N0Q if N0B is missing) plus the scan time. The pane repeats the scan time.
 
 DHU 2.x can also attach over USB accessory mode instead of the forward:
 

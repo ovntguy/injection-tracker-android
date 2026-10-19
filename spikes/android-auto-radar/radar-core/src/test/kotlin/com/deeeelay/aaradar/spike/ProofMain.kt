@@ -38,9 +38,15 @@ object ProofMain {
         val localPath = docs.resolve("local-nexrad-reflectivity.png")
         writeAnnotated(composed, localPath, label, load.tile != null)
 
-        val mrms = MrmsClient().fetchComposite(height = 480)
-        val nationalPath = docs.resolve("national-mrms-reflectivity.png")
-        Files.write(nationalPath, mrms.png)
+        val localOnly = args.contains("--local-only")
+        val mrms = if (localOnly) {
+            null
+        } else {
+            val fetched = MrmsClient().fetchComposite(height = 480)
+            Files.write(docs.resolve("national-mrms-reflectivity.png"), fetched.png)
+            fetched
+        }
+        val previous = if (localOnly) readNationalFields(docs.resolve("proof-metadata.json")) else null
 
         val echoPixels = composed.pixels.count { pixel ->
             val background = 0xFF101418.toInt()
@@ -62,18 +68,41 @@ object ProofMain {
             appendLine("  \"osmTile\": \"${load.tile?.coord?.url ?: ""}\",")
             appendLine("  \"osmError\": ${jsonString(load.tileError)},")
             appendLine("  \"echoPixels\": $echoPixels,")
-            appendLine("  \"mrmsLayer\": \"${mrms.layerName}\",")
-            appendLine("  \"mrmsCapabilities\": \"${mrms.capabilitiesUrl}\",")
-            appendLine("  \"mrmsUrlTemplate\": ${jsonString(mrms.urlTemplate)},")
-            appendLine("  \"mrmsRequestUrl\": ${jsonString(mrms.requestUrl)},")
-            appendLine("  \"mrmsTime\": ${jsonString(mrms.time)},")
-            appendLine("  \"mrmsTimeCount\": ${mrms.timeCount},")
-            appendLine("  \"mrmsPngBytes\": ${mrms.png.size}")
+            if (mrms != null) {
+                appendLine("  \"mrmsLayer\": \"${mrms.layerName}\",")
+                appendLine("  \"mrmsCapabilities\": \"${mrms.capabilitiesUrl}\",")
+                appendLine("  \"mrmsUrlTemplate\": ${jsonString(mrms.urlTemplate)},")
+                appendLine("  \"mrmsRequestUrl\": ${jsonString(mrms.requestUrl)},")
+                appendLine("  \"mrmsTime\": ${jsonString(mrms.time)},")
+                appendLine("  \"mrmsTimeCount\": ${mrms.timeCount},")
+                appendLine("  \"mrmsPngBytes\": ${mrms.png.size}")
+            } else {
+                append(previous ?: error("National proof metadata is missing"))
+            }
             appendLine("}")
         }
         Files.writeString(docs.resolve("proof-metadata.json"), metadata)
         println(metadata)
         check(echoPixels > 100) { "Local render has too few echo pixels ($echoPixels)" }
+    }
+
+    private fun readNationalFields(path: Path): String {
+        val text = Files.readString(path)
+        val keys = listOf(
+            "mrmsLayer",
+            "mrmsCapabilities",
+            "mrmsUrlTemplate",
+            "mrmsRequestUrl",
+            "mrmsTime",
+            "mrmsTimeCount",
+            "mrmsPngBytes",
+        )
+        return keys.mapIndexed { index, key ->
+            val match = Regex(""""$key"\s*:\s*("[^"]*"|-?[0-9]+)""").find(text)
+                ?: error("Missing $key in $path")
+            val comma = if (index == keys.lastIndex) "" else ","
+            "  \"$key\": ${match.groupValues[1]}$comma"
+        }.joinToString("\n") + "\n"
     }
 
     private fun jsonString(value: String?): String {
