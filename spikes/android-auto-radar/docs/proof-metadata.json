@@ -1,0 +1,23 @@
+{
+  "localSite": "KFTG",
+  "localName": "Front Range Arpt",
+  "product": "N0B",
+  "productCode": 153,
+  "scanTime": "2026-10-19T16:54:47Z",
+  "latitude": 39.786,
+  "longitude": -104.546,
+  "gateKm": 0.25,
+  "binCount": 1840,
+  "radials": 720,
+  "sourceUrl": "https://unidata-nexrad-level3.s3.amazonaws.com/FTG_N0B_2026_10_19_16_54_47",
+  "osmTile": "https://tile.openstreetmap.org/5/6/12.png",
+  "osmError": null,
+  "echoPixels": 207992,
+  "mrmsLayer": "conus_cref_qcd",
+  "mrmsCapabilities": "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_cref_qcd/ows?service=WMS&version=1.3.0&request=GetCapabilities",
+  "mrmsUrlTemplate": "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_cref_qcd/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=conus_cref_qcd&STYLES=&FORMAT=image/png&TRANSPARENT=TRUE&CRS=EPSG:3857&BBOX={minx},{miny},{maxx},{maxy}&WIDTH={width}&HEIGHT={height}&TIME={iso8601}",
+  "mrmsRequestUrl": "https://opengeo.ncep.noaa.gov/geoserver/conus/conus_cref_qcd/ows?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=conus_cref_qcd&STYLES=&FORMAT=image/png&TRANSPARENT=TRUE&CRS=EPSG:3857&BBOX=-1.402625583995247E7,2632018.6375864237,-7347086.392356057,6446275.841017159&WIDTH=840&HEIGHT=480&TIME=2026-10-19T16%3A56%3A41Z",
+  "mrmsTime": "2026-10-19T16:56:41Z",
+  "mrmsTimeCount": 60,
+  "mrmsPngBytes": 44136
+}
