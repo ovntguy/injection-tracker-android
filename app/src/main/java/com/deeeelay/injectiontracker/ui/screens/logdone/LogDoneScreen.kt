@@ -1,6 +1,14 @@
 package com.deeeelay.injectiontracker.ui.screens.logdone
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -52,7 +60,13 @@ import java.time.LocalTime
 
 private val ScreenPadding = 24.dp
 private val HitPadding = ZoneGeometry.HIT_PADDING_DP.dp
-private val ReadoutBottom = 24.dp
+private val ScrollBottom = 8.dp
+private val BarMargin = 16.dp
+private val ReadoutTop = 12.dp
+private val ReadoutToSave = 12.dp
+
+/** Line 1 keeps one height whether it shows a zone (titleMedium) or the hint, so taps don't resize the figure. */
+private val ReadoutLabelMinHeight = 24.dp
 
 @Composable
 fun LogDoneScreen(
@@ -83,6 +97,7 @@ fun LogDoneContent(
     onSiteSelected: (InjectionSite) -> Unit,
     onSave: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
+    scrollState: ScrollState = rememberScrollState(),
 ) {
     Scaffold(
         topBar = {
@@ -99,19 +114,12 @@ fun LogDoneContent(
             )
         },
         bottomBar = {
-            // Save log is pinned so it stays reachable when the figure makes the content scroll.
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                Button(
-                    onClick = onSave,
-                    enabled = state.canSave,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding()
-                        .padding(16.dp),
-                ) {
-                    Text(stringResource(R.string.action_save_log))
-                }
-            }
+            LogBottomBar(
+                state = state,
+                zone = zone,
+                contentUnderneath = scrollState.canScrollForward,
+                onSave = onSave,
+            )
         },
     ) { padding ->
         BoxWithConstraints(
@@ -124,7 +132,7 @@ fun LogDoneContent(
                 viewportHeight = viewportHeight,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
                     .padding(horizontal = ScreenPadding),
                 top = {
                     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -156,24 +164,59 @@ fun LogDoneContent(
                         onSiteSelected = onSiteSelected,
                     )
                 },
-                bottom = {
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        // 16 dp above the readout comes from the figure's hit padding.
-                        ZoneReadoutBlock(state, zone)
-                        Spacer(Modifier.height(ReadoutBottom))
-                    }
-                },
+                // The figure's 16 dp hit padding is the gap above the pinned bar.
+                bottom = { Spacer(Modifier.height(ScrollBottom)) },
             )
         }
     }
 }
 
 /**
+ * Pinned bottom bar: the zone readout directly above Save log, so the selection confirmation is
+ * visible at every screen size (Design Critique round 2, P1 fix 1). A 1 dp outlineVariant divider
+ * shows only while scrollable content sits under the bar (fix 3); it is drawn, not laid out, so
+ * toggling it never moves anything.
+ */
+@Composable
+private fun LogBottomBar(
+    state: LogDoneState,
+    zone: ZoneId,
+    contentUnderneath: Boolean,
+    onSave: () -> Unit,
+) {
+    val divider = MaterialTheme.colorScheme.outlineVariant
+    Surface(
+        color = MaterialTheme.colorScheme.surface,
+        modifier = Modifier.drawWithContent {
+            drawContent()
+            if (contentUnderneath) {
+                drawRect(divider, size = Size(size.width, 1.dp.toPx()))
+            }
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .navigationBarsPadding()
+                .padding(start = BarMargin, end = BarMargin, top = ReadoutTop, bottom = BarMargin),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            ZoneReadoutBlock(state, zone)
+            Spacer(Modifier.height(ReadoutToSave))
+            Button(
+                onClick = onSave,
+                enabled = state.canSave,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(stringResource(R.string.action_save_log))
+            }
+        }
+    }
+}
+
+/**
  * Lays out [top], the figure and [bottom], giving the figure the vertical space left in
- * [viewportHeight] (Design: fill between the prompt and the readout). The figure may make
+ * [viewportHeight] (Design: fill between the prompt and the pinned readout bar). The figure may make
  * the column taller than the viewport, in which case the parent scrolls.
  */
 @Composable
@@ -212,20 +255,27 @@ private val ReadoutDate: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d"
 @Composable
 private fun ZoneReadoutBlock(state: LogDoneState, zone: ZoneId) {
     val selected = state.site
-    if (selected != null) {
-        Text(
-            ZoneReadout.label(selected),
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            textAlign = TextAlign.Center,
-        )
-    } else {
-        Text(
-            stringResource(R.string.log_readout_empty),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-        )
+    Box(
+        modifier = Modifier
+            .heightIn(min = ReadoutLabelMinHeight)
+            .semantics { liveRegion = LiveRegionMode.Polite },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (selected != null) {
+            Text(
+                ZoneReadout.label(selected),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+            )
+        } else {
+            Text(
+                stringResource(R.string.log_readout_empty),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center,
+            )
+        }
     }
     val last = state.lastSite
     val lastAt = state.lastSiteAt
