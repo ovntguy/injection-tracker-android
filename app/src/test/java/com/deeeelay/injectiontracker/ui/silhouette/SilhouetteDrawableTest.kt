@@ -154,7 +154,7 @@ class SilhouetteDrawableTest {
         assertThat(SideLabels.LEFT_X).isIn(com.google.common.collect.Range.closed(l[0], l[1]))
         assertThat(SideLabels.RIGHT_X).isLessThan(InjectionSite.VIEWPORT_WIDTH / 2) // screen-left = anatomical right
         assertThat(SideLabels.Y).isIn(com.google.common.collect.Range.closed(18f, 30f))
-        assertThat(SideLabels.TEXT_SP).isAtLeast(10f)
+        assertThat(SideLabels.TEXT_SP).isEqualTo(14f) // Design Critique round 2: ~14sp bold, both screens
     }
 
     @Test
@@ -162,14 +162,16 @@ class SilhouetteDrawableTest {
         assertThat(SideLabels.fits(178f)).isTrue() // Home with a last site (280 dp tall)
         assertThat(SideLabels.fits(140f)).isTrue() // Home empty state (220 dp tall)
         assertThat(SideLabels.fits(80f)).isFalse()
+        // Log at its 1.7 dp/unit floor still shows them.
+        assertThat(SideLabels.fits(ZoneGeometry.LOG_BODY_CROP.width * ZoneGeometry.MIN_DP_PER_UNIT)).isTrue()
     }
 
     @Test
-    fun homeUsesNomarkersArtAndLogKeepsBakedRL() {
+    fun homeAndLogBothUseNomarkersArt() {
         assertThat(silhouetteBaseDrawableRes(SilhouetteMode.Display))
             .isEqualTo(com.deeeelay.injectiontracker.R.drawable.silhouette_display_empty_nomarkers)
         assertThat(silhouetteBaseDrawableRes(SilhouetteMode.Select))
-            .isEqualTo(com.deeeelay.injectiontracker.R.drawable.silhouette_select_unselected)
+            .isEqualTo(com.deeeelay.injectiontracker.R.drawable.silhouette_select_unselected_nomarkers)
     }
 
     private companion object {
