@@ -35,20 +35,6 @@
     <string name="home_no_shots_yet">No shots logged yet</string>
     <string name="home_last_site_description">Last site: %1$s, %2$s</string>
     <string name="home_marked_missed">Marked missed · schedule updated</string>
-    <plurals name="next_in_days">
-        <item quantity="one">in %d day</item>
-        <item quantity="other">in %d days</item>
-    </plurals>
-    <string name="next_tomorrow">tomorrow</string>
-    <string name="next_today_in_hours">today, in %d h</string>
-    <string name="next_in_minutes">in %d min</string>
-    <string name="next_due_now">due now</string>
-    <string name="next_overdue_by_hours">overdue by %d h</string>
-    <string name="next_overdue_by_minutes">overdue by %d min</string>
-    <plurals name="next_days_overdue">
-        <item quantity="one">%d day overdue</item>
-        <item quantity="other">%d days overdue</item>
-    </plurals>
     <string name="home_notif_denied">Notifications are off. Reminders won’t fire until you allow them.</string>
     <string name="home_dose_frequency">%1$s · %2$s</string>
 

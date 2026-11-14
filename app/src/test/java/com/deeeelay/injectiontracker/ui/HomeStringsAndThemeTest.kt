@@ -17,9 +17,10 @@ import java.time.ZonedDateTime
 /** P3 (items 6, 11, 16, 18): exact Design strings, date format, last-site source, nav colors. */
 class HomeStringsAndThemeTest {
     private val strings by lazy {
-        val f = listOf("src/main/res/values/strings.xml", "app/src/main/res/values/strings.xml")
-            .map(::File).first { it.exists() }
-        f.readText()
+        listOf("strings.xml", "strings_next_shot.xml").joinToString("\n") { name ->
+            listOf("src/main/res/values/$name", "app/src/main/res/values/$name")
+                .map(::File).first { it.exists() }.readText()
+        }
     }
 
     private fun string(name: String): String =
