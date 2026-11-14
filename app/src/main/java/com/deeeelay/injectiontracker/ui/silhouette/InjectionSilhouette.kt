@@ -152,10 +152,11 @@ fun InjectionSilhouette(
     lastSite: InjectionSite? = null,
     hitPadding: Dp = 0.dp,
     window: ZoneGeometry.ViewWindow = ZoneGeometry.FULL_FRAME,
+    description: String? = null,
     onSiteSelected: ((InjectionSite) -> Unit)? = null,
 ) {
     val density = LocalDensity.current
-    val imageDescription = when {
+    val imageDescription = description ?: when {
         markedSite != null -> siteLabel(markedSite)
         mode == SilhouetteMode.Display -> stringResource(R.string.home_last_site)
         else -> stringResource(R.string.log_done_tap_site)
