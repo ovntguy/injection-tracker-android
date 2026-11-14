@@ -90,6 +90,79 @@ fun HomeScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
+    HomeContent(
+        state = state,
+        remindersWanted = remindersWanted,
+        notificationsAllowed = notificationsAllowed,
+        onLogInjection = onLogInjection,
+        onMarkMissed = { showMissed = true },
+        onEditRegimen = onEditRegimen,
+        onEnableNotifications = {
+            if (Build.VERSION.SDK_INT >= 33) {
+                val granted = ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.POST_NOTIFICATIONS,
+                ) == PackageManager.PERMISSION_GRANTED
+                if (!granted) {
+                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                } else {
+                    context.startActivity(
+                        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                        },
+                    )
+                }
+            } else {
+                context.startActivity(
+                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    },
+                )
+            }
+        },
+    )
+
+    if (showMissed) {
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ModalBottomSheet(
+            onDismissRequest = { showMissed = false },
+            sheetState = sheetState,
+        ) {
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .padding(bottom = 32.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(stringResource(R.string.missed_title), style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(R.string.missed_body), style = MaterialTheme.typography.bodyMedium)
+                Button(
+                    onClick = {
+                        viewModel.logMissed()
+                        showMissed = false
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.action_log_missed)) }
+                TextButton(
+                    onClick = { showMissed = false },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text(stringResource(R.string.action_cancel)) }
+            }
+        }
+    }
+}
+
+@Composable
+fun HomeContent(
+    state: HomeUiState,
+    remindersWanted: Boolean,
+    notificationsAllowed: Boolean,
+    onLogInjection: () -> Unit,
+    onMarkMissed: () -> Unit,
+    onEditRegimen: () -> Unit,
+    onEnableNotifications: () -> Unit,
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -164,7 +237,7 @@ fun HomeScreen(
         Button(onClick = onLogInjection, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.action_log_injection))
         }
-        OutlinedButton(onClick = { showMissed = true }, modifier = Modifier.fillMaxWidth()) {
+        OutlinedButton(onClick = onMarkMissed, modifier = Modifier.fillMaxWidth()) {
             Text(stringResource(R.string.action_i_missed_it))
         }
         TextButton(onClick = onEditRegimen, modifier = Modifier.align(Alignment.CenterHorizontally)) {
@@ -183,29 +256,7 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.onErrorContainer,
                     )
                     TextButton(
-                        onClick = {
-                            if (Build.VERSION.SDK_INT >= 33) {
-                                val granted = ContextCompat.checkSelfPermission(
-                                    context,
-                                    Manifest.permission.POST_NOTIFICATIONS,
-                                ) == PackageManager.PERMISSION_GRANTED
-                                if (!granted) {
-                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                } else {
-                                    context.startActivity(
-                                        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                        },
-                                    )
-                                }
-                            } else {
-                                context.startActivity(
-                                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
-                                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                                    },
-                                )
-                            }
-                        },
+                        onClick = onEnableNotifications,
                     ) { Text(stringResource(R.string.action_enable)) }
                 }
             }
@@ -213,35 +264,6 @@ fun HomeScreen(
         Spacer(Modifier.height(8.dp))
     }
 
-    if (showMissed) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        ModalBottomSheet(
-            onDismissRequest = { showMissed = false },
-            sheetState = sheetState,
-        ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Text(stringResource(R.string.missed_title), style = MaterialTheme.typography.titleLarge)
-                Text(stringResource(R.string.missed_body), style = MaterialTheme.typography.bodyMedium)
-                Button(
-                    onClick = {
-                        viewModel.logMissed()
-                        showMissed = false
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.action_log_missed)) }
-                TextButton(
-                    onClick = { showMissed = false },
-                    modifier = Modifier.fillMaxWidth(),
-                ) { Text(stringResource(R.string.action_cancel)) }
-            }
-        }
-    }
 }
 
 private fun areNotificationsEnabled(context: Context): Boolean {
