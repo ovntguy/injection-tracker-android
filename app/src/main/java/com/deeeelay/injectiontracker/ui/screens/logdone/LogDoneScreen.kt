@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -22,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -31,7 +33,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
@@ -97,6 +98,21 @@ fun LogDoneContent(
                 },
             )
         },
+        bottomBar = {
+            // Save log is pinned so it stays reachable when the figure makes the content scroll.
+            Surface(color = MaterialTheme.colorScheme.surface) {
+                Button(
+                    onClick = onSave,
+                    enabled = state.canSave,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .navigationBarsPadding()
+                        .padding(16.dp),
+                ) {
+                    Text(stringResource(R.string.action_save_log))
+                }
+            }
+        },
     ) { padding ->
         BoxWithConstraints(
             modifier = Modifier
@@ -104,7 +120,6 @@ fun LogDoneContent(
                 .padding(padding),
         ) {
             val viewportHeight = maxHeight
-            val screenWidthDp = LocalConfiguration.current.screenWidthDp.toFloat()
             FigureFillColumn(
                 viewportHeight = viewportHeight,
                 modifier = Modifier
@@ -126,12 +141,14 @@ fun LogDoneContent(
                     }
                 },
                 figure = { availableHeight ->
-                    val scale = ZoneGeometry.logFigureScale(screenWidthDp, availableHeight.value)
+                    val scale = ZoneGeometry.logFigureScale(availableHeight.value)
+                    val crop = ZoneGeometry.LOG_BODY_CROP
                     InjectionSilhouette(
                         modifier = Modifier.size(
-                            width = (InjectionSiteViewport.W * scale).dp + HitPadding * 2,
-                            height = (InjectionSiteViewport.H * scale).dp + HitPadding * 2,
+                            width = (crop.width * scale).dp + HitPadding * 2,
+                            height = (crop.height * scale).dp + HitPadding * 2,
                         ),
+                        window = crop,
                         mode = SilhouetteMode.Select,
                         markedSite = state.site,
                         lastSite = state.lastSite,
@@ -147,24 +164,11 @@ fun LogDoneContent(
                         // 16 dp above the readout comes from the figure's hit padding.
                         ZoneReadoutBlock(state, zone)
                         Spacer(Modifier.height(ReadoutBottom))
-                        Button(
-                            onClick = onSave,
-                            enabled = state.canSave,
-                            modifier = Modifier.fillMaxWidth(),
-                        ) {
-                            Text(stringResource(R.string.action_save_log))
-                        }
-                        Spacer(Modifier.height(24.dp))
                     }
                 },
             )
         }
     }
-}
-
-private object InjectionSiteViewport {
-    const val W = InjectionSite.VIEWPORT_WIDTH
-    const val H = InjectionSite.VIEWPORT_HEIGHT
 }
 
 /**

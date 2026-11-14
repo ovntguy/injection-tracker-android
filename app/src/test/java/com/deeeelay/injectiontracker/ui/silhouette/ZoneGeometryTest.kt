@@ -80,16 +80,50 @@ class ZoneGeometryTest {
     }
 
     @Test
-    fun logFigureScaleStaysBetween70And75PercentOfWidthAndAbove1point6() {
-        val width = 411f
-        // Plenty of height: capped at 75% of width.
-        assertThat(ZoneGeometry.logFigureScale(width, 2000f) * 140f).isWithin(0.01f).of(width * 0.75f)
-        // Little height: floored at 70% of width (column scrolls).
-        assertThat(ZoneGeometry.logFigureScale(width, 100f) * 140f).isWithin(0.01f).of(width * 0.70f)
-        // In between: fills the height.
-        assertThat(ZoneGeometry.logFigureScale(width, 460f)).isWithin(0.001f).of(460f / 220f)
-        // Narrow screen: never below 1.6 dp per unit.
-        assertThat(ZoneGeometry.logFigureScale(200f, 100f)).isAtLeast(1.6f)
+    fun logFigureScalesByBodyCropBetween1point7And2point0() {
+        val cropH = ZoneGeometry.LOG_BODY_CROP.height
+        // Plenty of height: capped at the 2.0 dp/unit target (no width cap).
+        assertThat(ZoneGeometry.logFigureScale(2000f)).isEqualTo(2.0f)
+        // Tight: floored at 1.7 dp/unit; the screen scrolls instead.
+        assertThat(ZoneGeometry.logFigureScale(100f)).isEqualTo(1.7f)
+        // In between: the body crop fills the available height.
+        assertThat(ZoneGeometry.logFigureScale(cropH * 1.85f)).isWithin(1e-4f).of(1.85f)
+    }
+
+    @Test
+    fun bodyCropIsDesignBodyBoundsPlusSixUnits() {
+        // Design polish spec (revised 09:45 CST): bodyBounds x 32.9–107.1, y 5–215, + 6 units.
+        assertThat(ZoneGeometry.BODY_X).isEqualTo(32.9f)
+        assertThat(ZoneGeometry.BODY_X + ZoneGeometry.BODY_WIDTH).isWithin(1e-4f).of(107.1f)
+        assertThat(ZoneGeometry.BODY_Y).isEqualTo(5f)
+        assertThat(ZoneGeometry.BODY_Y + ZoneGeometry.BODY_HEIGHT).isEqualTo(215f)
+        val crop = ZoneGeometry.LOG_BODY_CROP
+        assertThat(crop.x).isWithin(1e-4f).of(26.9f)
+        assertThat(crop.y).isEqualTo(-1f)
+        assertThat(crop.width).isWithin(1e-4f).of(86.2f)
+        assertThat(crop.height).isEqualTo(222f)
+        // The crop is centered on the body, and every zone center is inside it.
+        assertThat(crop.x + crop.width / 2).isWithin(1e-4f).of(ZoneGeometry.BODY_X + ZoneGeometry.BODY_WIDTH / 2)
+        InjectionSite.entries.forEach { site ->
+            assertThat(site.viewportX).isIn(com.google.common.collect.Range.open(crop.x, crop.x + crop.width))
+            assertThat(site.viewportY).isIn(com.google.common.collect.Range.open(crop.y, crop.y + crop.height))
+        }
+    }
+
+    @Test
+    fun croppedMarkerCentersStillDeriveFromCxCyAndSnap() {
+        val crop = ZoneGeometry.LOG_BODY_CROP
+        val unitPx = 2.0f * pxPerDp
+        val cw = crop.width * unitPx
+        val ch = crop.height * unitPx
+        InjectionSite.entries.forEach { site ->
+            val p = ZoneGeometry.markerCenter(site, cw, ch, crop)
+            assertThat(p.x).isWithin(1e-2f).of((site.viewportX - crop.x) * unitPx)
+            assertThat(p.y).isWithin(1e-2f).of((site.viewportY - crop.y) * unitPx)
+            assertThat(ZoneGeometry.snapToZone(p.x, p.y, cw, ch, pxPerDp, crop)).isEqualTo(site)
+        }
+        val top = ZoneGeometry.markerCenter(InjectionSite.RIGHT_UPPER_ARM_PROXIMAL, cw, ch, crop)
+        assertThat(ZoneGeometry.snapToZone(top.x, top.y - 28.2f * pxPerDp, cw, ch, pxPerDp, crop)).isNull()
     }
 
     @Test
