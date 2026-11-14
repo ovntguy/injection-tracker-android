@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -28,12 +29,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.ZoneReadout
@@ -44,11 +48,31 @@ private const val VIEWPORT_W = InjectionSite.VIEWPORT_WIDTH
 private const val VIEWPORT_H = InjectionSite.VIEWPORT_HEIGHT
 private val MinHitTarget = InjectionSite.HIT_TARGET_DP.dp
 
-/** Marker-free base art: markers are drawn in code from zones.json cx/cy. */
+/**
+ * Base art without zone dots; markers are drawn in code from zones.json cx/cy.
+ * Home (Display) is a small figure, so it uses Visual's `_nomarkers` art and draws R/L in code
+ * ([SideLabels]); full-size Log (Select) keeps the base art with the baked R/L glyphs.
+ */
 @DrawableRes
 fun silhouetteBaseDrawableRes(mode: SilhouetteMode): Int = when (mode) {
-    SilhouetteMode.Display -> R.drawable.silhouette_display_empty
+    SilhouetteMode.Display -> R.drawable.silhouette_display_empty_nomarkers
     SilhouetteMode.Select -> R.drawable.silhouette_select_unselected
+}
+
+/** Code-drawn R/L for small figures, placed where Visual's baked glyphs sit. */
+object SideLabels {
+    /** Glyph centers in viewBox units, from the marker_R / marker_L paths in the base art. */
+    const val RIGHT_X = 22f
+    const val LEFT_X = 118f
+    const val Y = 24f
+
+    /** Text size; Design Critique asked for at least 10sp. */
+    const val TEXT_SP = 12f
+
+    /** Below this figure width the labels would crowd the head and arms, so they are left off. */
+    const val MIN_FIGURE_WIDTH_DP = 100f
+
+    fun fits(figureWidthDp: Float): Boolean = figureWidthDp >= MIN_FIGURE_WIDTH_DP
 }
 
 /**
@@ -213,6 +237,10 @@ fun InjectionSilhouette(
                         )
                     }
                 }
+                if (mode == SilhouetteMode.Display && SideLabels.fits(widthDp.value)) {
+                    SideLabel(stringResource(R.string.silhouette_side_right), SideLabels.RIGHT_X, widthDp, heightDp)
+                    SideLabel(stringResource(R.string.silhouette_side_left), SideLabels.LEFT_X, widthDp, heightDp)
+                }
                 if (selectable) {
                     InjectionSite.entries.forEach { site ->
                         val c = ZoneGeometry.markerCenter(site, widthDp.value, heightDp.value, window)
@@ -235,6 +263,28 @@ fun InjectionSilhouette(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SideLabel(text: String, viewportX: Float, widthDp: Dp, heightDp: Dp) {
+    val box = 24.dp
+    Box(
+        modifier = Modifier
+            .offset(
+                x = widthDp * (viewportX / VIEWPORT_W) - box / 2,
+                y = heightDp * (SideLabels.Y / VIEWPORT_H) - box / 2,
+            )
+            .size(box)
+            .clearAndSetSemantics {},
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = SideLabels.TEXT_SP.sp,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 

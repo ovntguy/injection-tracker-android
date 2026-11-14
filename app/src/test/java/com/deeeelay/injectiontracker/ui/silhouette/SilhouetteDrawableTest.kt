@@ -118,6 +118,60 @@ class SilhouetteDrawableTest {
         }
     }
 
+    @Test
+    fun nomarkersVariantsAreBaseArtWithoutRL() {
+        listOf("drawable", "drawable-night").forEach { dirName ->
+            val dir = File(drawableDir().parentFile, dirName)
+            listOf(
+                "silhouette_display_empty" to "silhouette_display_empty_nomarkers",
+                "silhouette_select_unselected" to "silhouette_select_unselected_nomarkers",
+            ).forEach { (base, small) ->
+                val baseText = File(dir, "$base.xml").readText()
+                val smallText = File(dir, "$small.xml").readText()
+                assertThat(baseText).contains("marker_R")
+                assertThat(smallText).doesNotContain("marker_R")
+                assertThat(smallText).doesNotContain("marker_L")
+                assertThat(smallText).doesNotContain("dot_")
+                val body = Regex("""android:name="body_outline"\s+android:pathData="([^"]+)"""")
+                assertThat(body.find(smallText)!!.groupValues[1]).isEqualTo(body.find(baseText)!!.groupValues[1])
+            }
+        }
+    }
+
+    @Test
+    fun codeDrawnSideLabelsSitOnTheBakedGlyphs() {
+        val text = File(drawableDir(), "silhouette_display_empty.xml").readText()
+        fun bbox(name: String): List<Float> {
+            val path = Regex("""android:name="$name"\s+android:pathData="([^"]+)"""").find(text)!!.groupValues[1]
+            // Absolute M/H/V/L/Q coordinates; good enough for a bounding box of these glyphs.
+            val nums = Regex("""-?[0-9]+(?:\.[0-9]+)?""").findAll(path).map { it.value.toFloat() }.toList()
+            val xs = nums.filter { it > 10f && it < 130f && (if (name == "marker_R") it < 40f else it > 100f) }
+            return listOf(xs.min(), xs.max())
+        }
+        val r = bbox("marker_R")
+        val l = bbox("marker_L")
+        assertThat(SideLabels.RIGHT_X).isIn(com.google.common.collect.Range.closed(r[0], r[1]))
+        assertThat(SideLabels.LEFT_X).isIn(com.google.common.collect.Range.closed(l[0], l[1]))
+        assertThat(SideLabels.RIGHT_X).isLessThan(InjectionSite.VIEWPORT_WIDTH / 2) // screen-left = anatomical right
+        assertThat(SideLabels.Y).isIn(com.google.common.collect.Range.closed(18f, 30f))
+        assertThat(SideLabels.TEXT_SP).isAtLeast(10f)
+    }
+
+    @Test
+    fun sideLabelsOnlyWhenTheyFit() {
+        assertThat(SideLabels.fits(178f)).isTrue() // Home with a last site (280 dp tall)
+        assertThat(SideLabels.fits(140f)).isTrue() // Home empty state (220 dp tall)
+        assertThat(SideLabels.fits(80f)).isFalse()
+    }
+
+    @Test
+    fun homeUsesNomarkersArtAndLogKeepsBakedRL() {
+        assertThat(silhouetteBaseDrawableRes(SilhouetteMode.Display))
+            .isEqualTo(com.deeeelay.injectiontracker.R.drawable.silhouette_display_empty_nomarkers)
+        assertThat(silhouetteBaseDrawableRes(SilhouetteMode.Select))
+            .isEqualTo(com.deeeelay.injectiontracker.R.drawable.silhouette_select_unselected)
+    }
+
     private companion object {
         const val ART_DOT_RADIUS = 2.0f
     }
