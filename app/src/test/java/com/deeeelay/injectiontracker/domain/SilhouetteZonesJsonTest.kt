@@ -10,15 +10,15 @@ class SilhouetteZonesJsonTest {
         val json = readLockJson()
         assertThat(json).contains("\"zoneCount\": 18")
         assertThat(json).contains("\"hitTargetDp\": 48")
-        assertThat(json).contains("\"displayDotRadius\": 1.75")
+        assertThat(json).contains("\"displayDotRadius\": 2.0")
         assertThat(json).contains("\"selectCenterDotRadius\": 1.5")
         assertThat(json).contains("\"hitRegionsLocked\": true")
         assertThat(json).contains("\"version\": \"v1.1-lr-swap\"")
         assertThat(json).contains("\"centersVersion\": \"v2-tighter-bands\"")
         assertThat(json).contains("v1.1-lr-swap")
-        assertThat(json).contains("\"bodyFill\": \"#F3EDF7\"")
-        assertThat(json).contains("\"displayStroke\": \"#CAC4D0\"")
-        assertThat(json).contains("\"selectStroke\": \"#49454F\"")
+        // 2026-11-14 Visual restyle (style fields only; Design-owned).
+        assertThat(json).contains("\"displayStroke\": \"#79747E\"")
+        assertThat(json).contains("\"selectStroke\": \"#79747E\"")
 
         InjectionSite.entries.forEach { site ->
             assertThat(json).contains("\"id\": \"${site.zoneId}\"")
