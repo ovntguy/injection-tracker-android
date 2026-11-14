@@ -28,6 +28,33 @@ class SilhouetteZonesJsonTest {
         assertThat(Regex("\"id\": ").findAll(json).count()).isEqualTo(18)
     }
 
+    @Test
+    fun everyZoneHasExplicitSideMatchingItsIdAndFlatRegionBand() {
+        val json = readLockJson()
+        val zone = Regex(
+            """"id": "((right|left)_([a-z_]+)_(proximal|mid|distal))",[^}]*?"side": "([a-z]+)",\s*"region": "([a-z_]+)",\s*"band": "([a-z]+)"""",
+        )
+        val found = zone.findAll(json).toList()
+        assertThat(found).hasSize(18)
+        found.forEach { m ->
+            val (_, side, region, band, jsonSide, jsonRegion, jsonBand) = m.destructured
+            assertThat(jsonSide).isEqualTo(side)
+            assertThat(jsonRegion).isEqualTo(region)
+            assertThat(jsonBand).isEqualTo(band)
+        }
+        assertThat(json).doesNotContain("\"bands\"")
+    }
+
+    @Test
+    fun bodyBoundsMatchTheLogCropConstants() {
+        val json = readLockJson()
+        val bounds = Regex(
+            """"bodyBounds": \{\s*"x": ([0-9.]+),\s*"y": ([0-9.]+),\s*"width": ([0-9.]+),\s*"height": ([0-9.]+)""",
+        ).find(json)!!.groupValues.drop(1).map { it.toFloat() }
+        val g = com.deeeelay.injectiontracker.ui.silhouette.ZoneGeometry
+        assertThat(bounds).containsExactly(g.BODY_X, g.BODY_Y, g.BODY_WIDTH, g.BODY_HEIGHT).inOrder()
+    }
+
     private fun formatCoord(value: Float): String {
         val asInt = value.toInt()
         return if (value == asInt.toFloat()) {

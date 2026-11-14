@@ -26,144 +26,162 @@
       "label": "Right upper arm (high)",
       "cx": 47.0,
       "cy": 60.0,
-      "band": "proximal",
-      "region": "upper_arm"
+      "side": "right",
+      "region": "upper_arm",
+      "band": "proximal"
     },
     {
       "id": "right_upper_arm_mid",
       "label": "Right upper arm (mid)",
       "cx": 45.5,
       "cy": 73.0,
-      "band": "mid",
-      "region": "upper_arm"
+      "side": "right",
+      "region": "upper_arm",
+      "band": "mid"
     },
     {
       "id": "right_upper_arm_distal",
       "label": "Right upper arm (low)",
       "cx": 44.5,
       "cy": 86.0,
-      "band": "distal",
-      "region": "upper_arm"
+      "side": "right",
+      "region": "upper_arm",
+      "band": "distal"
     },
     {
       "id": "left_upper_arm_proximal",
       "label": "Left upper arm (high)",
       "cx": 93.0,
       "cy": 60.0,
-      "band": "proximal",
-      "region": "upper_arm"
+      "side": "left",
+      "region": "upper_arm",
+      "band": "proximal"
     },
     {
       "id": "left_upper_arm_mid",
       "label": "Left upper arm (mid)",
       "cx": 94.5,
       "cy": 73.0,
-      "band": "mid",
-      "region": "upper_arm"
+      "side": "left",
+      "region": "upper_arm",
+      "band": "mid"
     },
     {
       "id": "left_upper_arm_distal",
       "label": "Left upper arm (low)",
       "cx": 95.5,
       "cy": 86.0,
-      "band": "distal",
-      "region": "upper_arm"
+      "side": "left",
+      "region": "upper_arm",
+      "band": "distal"
     },
     {
       "id": "right_abdomen_proximal",
       "label": "Right abdomen (upper)",
       "cx": 60.0,
       "cy": 92.0,
-      "band": "proximal",
-      "region": "abdomen"
+      "side": "right",
+      "region": "abdomen",
+      "band": "proximal"
     },
     {
       "id": "right_abdomen_mid",
       "label": "Right abdomen (mid)",
       "cx": 59.5,
       "cy": 105.0,
-      "band": "mid",
-      "region": "abdomen"
+      "side": "right",
+      "region": "abdomen",
+      "band": "mid"
     },
     {
       "id": "right_abdomen_distal",
       "label": "Right abdomen (lower)",
       "cx": 59.5,
       "cy": 118.0,
-      "band": "distal",
-      "region": "abdomen"
+      "side": "right",
+      "region": "abdomen",
+      "band": "distal"
     },
     {
       "id": "left_abdomen_proximal",
       "label": "Left abdomen (upper)",
       "cx": 80.0,
       "cy": 92.0,
-      "band": "proximal",
-      "region": "abdomen"
+      "side": "left",
+      "region": "abdomen",
+      "band": "proximal"
     },
     {
       "id": "left_abdomen_mid",
       "label": "Left abdomen (mid)",
       "cx": 80.5,
       "cy": 105.0,
-      "band": "mid",
-      "region": "abdomen"
+      "side": "left",
+      "region": "abdomen",
+      "band": "mid"
     },
     {
       "id": "left_abdomen_distal",
       "label": "Left abdomen (lower)",
       "cx": 80.5,
       "cy": 118.0,
-      "band": "distal",
-      "region": "abdomen"
+      "side": "left",
+      "region": "abdomen",
+      "band": "distal"
     },
     {
       "id": "right_upper_thigh_proximal",
       "label": "Right thigh (high)",
       "cx": 61.0,
       "cy": 134.0,
-      "band": "proximal",
-      "region": "upper_thigh"
+      "side": "right",
+      "region": "upper_thigh",
+      "band": "proximal"
     },
     {
       "id": "right_upper_thigh_mid",
       "label": "Right thigh (mid)",
       "cx": 61.0,
       "cy": 146.0,
-      "band": "mid",
-      "region": "upper_thigh"
+      "side": "right",
+      "region": "upper_thigh",
+      "band": "mid"
     },
     {
       "id": "right_upper_thigh_distal",
       "label": "Right thigh (low)",
       "cx": 60.5,
       "cy": 158.0,
-      "band": "distal",
-      "region": "upper_thigh"
+      "side": "right",
+      "region": "upper_thigh",
+      "band": "distal"
     },
     {
       "id": "left_upper_thigh_proximal",
       "label": "Left thigh (high)",
       "cx": 79.0,
       "cy": 134.0,
-      "band": "proximal",
-      "region": "upper_thigh"
+      "side": "left",
+      "region": "upper_thigh",
+      "band": "proximal"
     },
     {
       "id": "left_upper_thigh_mid",
       "label": "Left thigh (mid)",
       "cx": 79.0,
       "cy": 146.0,
-      "band": "mid",
-      "region": "upper_thigh"
+      "side": "left",
+      "region": "upper_thigh",
+      "band": "mid"
     },
     {
       "id": "left_upper_thigh_distal",
       "label": "Left thigh (low)",
       "cx": 79.5,
       "cy": 158.0,
-      "band": "distal",
-      "region": "upper_thigh"
+      "side": "left",
+      "region": "upper_thigh",
+      "band": "distal"
     }
   ],
   "centersVersion": "v2-tighter-bands",
@@ -174,5 +192,12 @@
   "bodyFillNote": "#79747E at 6% alpha (ARGB), matches shipped art; flattened on #FFFBFE = #F7F3F6",
   "styleUpdated": "2026-11-14 Visual new silhouette art; style fields only, zones unchanged",
   "displayDotRadiusNote": "Art-only (baked preview drawables). In-app markers are drawn in code at dp sizes per /workspace/design/injection-tracker-polish-2026-11-14.md; do not scale from viewBox radii.",
-  "deprecatedDrawables": "Per-zone display_* / select_* drawables are DEPRECATED (2026-11-14). Android draws markers in code over display_empty / select_unselected."
+  "deprecatedDrawables": "Per-zone display_* / select_* drawables are DEPRECATED (2026-11-14). Android draws markers in code over display_empty / select_unselected.",
+  "bodyBounds": {
+    "x": 32.9,
+    "y": 5.0,
+    "width": 74.2,
+    "height": 210.0,
+    "note": "Silhouette path extents in viewBox units; scale the figure by these, not the 140x220 frame."
+  }
 }

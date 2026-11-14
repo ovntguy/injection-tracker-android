@@ -21,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -206,12 +205,12 @@ fun InjectionSilhouette(
                     .semantics { contentDescription = imageDescription },
             ) {
                 Canvas(Modifier.fillMaxSize()) {
-                    // Draw the whole 140×220 art, shifted so only [window] lands in this box.
+                    // Draw the whole 140×220 art, shifted so [window] lands in this box. Not clipped:
+                    // the body is inside the window, and the baked R/L letters (x≈17–26, 114–122)
+                    // sit just outside the Log body crop, so they paint beside the figure.
                     val unit = size.width / window.width
-                    clipRect {
-                        translate(-window.x * unit, -window.y * unit) {
-                            with(art) { draw(Size(VIEWPORT_W * unit, VIEWPORT_H * unit)) }
-                        }
+                    translate(-window.x * unit, -window.y * unit) {
+                        with(art) { draw(Size(VIEWPORT_W * unit, VIEWPORT_H * unit)) }
                     }
                 }
                 Canvas(Modifier.fillMaxSize()) {
