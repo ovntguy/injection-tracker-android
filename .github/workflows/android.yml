@@ -4,7 +4,6 @@ on:
   push:
     branches: [ "main" ]
   pull_request:
-    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -20,5 +19,5 @@ jobs:
         uses: android-actions/setup-android@v4
         with:
           packages: platform-tools
-      - name: Unit tests and debug APK
-        run: ./gradlew :app:test :app:assembleDebug --stacktrace
+      - name: Unit tests, lint, Paparazzi, and debug APK
+        run: ./gradlew :app:test :app:lint :app:verifyPaparazziDebug :app:assembleDebug --stacktrace
