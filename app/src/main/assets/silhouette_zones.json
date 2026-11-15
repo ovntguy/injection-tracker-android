@@ -191,7 +191,7 @@
   "displayStrokeWidth": 2.0,
   "bodyFillNote": "#79747E at 6% alpha (ARGB), matches shipped art; flattened on #FFFBFE = #F7F3F6",
   "styleUpdated": "2026-11-14 Visual new silhouette art; style fields only, zones unchanged",
-  "displayDotRadiusNote": "Art-only (baked preview drawables). In-app markers are drawn in code at dp sizes per /workspace/design/injection-tracker-polish-2026-11-14.md; do not scale from viewBox radii.",
+  "displayDotRadiusNote": "Art-only (baked preview drawables). In-app markers are drawn in code at dp sizes per the Injection Tracker polish spec (2026-11-14); do not scale from viewBox radii.",
   "deprecatedDrawables": "Per-zone display_* / select_* drawables are DEPRECATED (2026-11-14). Android draws markers in code over display_empty / select_unselected.",
   "bodyBounds": {
     "x": 32.9,
