@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +21,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.vector.VectorPainter
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
@@ -28,12 +28,15 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.ZoneReadout
@@ -44,11 +47,31 @@ private const val VIEWPORT_W = InjectionSite.VIEWPORT_WIDTH
 private const val VIEWPORT_H = InjectionSite.VIEWPORT_HEIGHT
 private val MinHitTarget = InjectionSite.HIT_TARGET_DP.dp
 
-/** Marker-free base art: markers are drawn in code from zones.json cx/cy. */
+/**
+ * Base art without zone dots; markers are drawn in code from zones.json cx/cy.
+ * Both Home and Log use Visual's `_nomarkers` art and draw R/L in code ([SideLabels]) in one
+ * style (Design Critique round 2: the baked Log glyphs were ~24 dp gray, heavier than the heading).
+ */
 @DrawableRes
 fun silhouetteBaseDrawableRes(mode: SilhouetteMode): Int = when (mode) {
-    SilhouetteMode.Display -> R.drawable.silhouette_display_empty
-    SilhouetteMode.Select -> R.drawable.silhouette_select_unselected
+    SilhouetteMode.Display -> R.drawable.silhouette_display_empty_nomarkers
+    SilhouetteMode.Select -> R.drawable.silhouette_select_unselected_nomarkers
+}
+
+/** Code-drawn R/L for Home and Log, placed where Visual's baked glyphs sit in the base art. */
+object SideLabels {
+    /** Glyph centers in viewBox units, from the marker_R / marker_L paths in the base art. */
+    const val RIGHT_X = 22f
+    const val LEFT_X = 118f
+    const val Y = 24f
+
+    /** Text size, bold, onSurfaceVariant on both screens (Design Critique round 2: ~14sp). */
+    const val TEXT_SP = 14f
+
+    /** Below this figure width the labels would crowd the head and arms, so they are left off. */
+    const val MIN_FIGURE_WIDTH_DP = 100f
+
+    fun fits(figureWidthDp: Float): Boolean = figureWidthDp >= MIN_FIGURE_WIDTH_DP
 }
 
 /**
@@ -182,12 +205,11 @@ fun InjectionSilhouette(
                     .semantics { contentDescription = imageDescription },
             ) {
                 Canvas(Modifier.fillMaxSize()) {
-                    // Draw the whole 140×220 art, shifted so only [window] lands in this box.
+                    // Draw the whole 140×220 art, shifted so [window] lands in this box. The body lies
+                    // inside every window, so nothing needs clipping.
                     val unit = size.width / window.width
-                    clipRect {
-                        translate(-window.x * unit, -window.y * unit) {
-                            with(art) { draw(Size(VIEWPORT_W * unit, VIEWPORT_H * unit)) }
-                        }
+                    translate(-window.x * unit, -window.y * unit) {
+                        with(art) { draw(Size(VIEWPORT_W * unit, VIEWPORT_H * unit)) }
                     }
                 }
                 Canvas(Modifier.fillMaxSize()) {
@@ -213,6 +235,10 @@ fun InjectionSilhouette(
                         )
                     }
                 }
+                if (SideLabels.fits(widthDp.value)) {
+                    SideLabel(stringResource(R.string.silhouette_side_right), SideLabels.RIGHT_X, window, widthDp, heightDp)
+                    SideLabel(stringResource(R.string.silhouette_side_left), SideLabels.LEFT_X, window, widthDp, heightDp)
+                }
                 if (selectable) {
                     InjectionSite.entries.forEach { site ->
                         val c = ZoneGeometry.markerCenter(site, widthDp.value, heightDp.value, window)
@@ -235,6 +261,36 @@ fun InjectionSilhouette(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun SideLabel(
+    text: String,
+    viewportX: Float,
+    window: ZoneGeometry.ViewWindow,
+    widthDp: Dp,
+    heightDp: Dp,
+) {
+    // On Log the glyph centers (x 22 / 118) sit just outside the body crop, so the labels draw
+    // beside the figure, in the hit padding; the parent does not clip.
+    val box = 24.dp
+    Box(
+        modifier = Modifier
+            .offset(
+                x = widthDp * ((viewportX - window.x) / window.width) - box / 2,
+                y = heightDp * ((SideLabels.Y - window.y) / window.height) - box / 2,
+            )
+            .size(box)
+            .clearAndSetSemantics {},
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            text = text,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = SideLabels.TEXT_SP.sp,
+            fontWeight = FontWeight.Bold,
+        )
     }
 }
 

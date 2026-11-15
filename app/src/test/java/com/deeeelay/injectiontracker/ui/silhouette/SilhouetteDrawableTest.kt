@@ -57,15 +57,12 @@ class SilhouetteDrawableTest {
         names.forEach { name ->
             val text = File(dir, name).readText()
             assertThat(text).contains(emptyPath)
-            if (name.contains("display") && name != "silhouette_display_empty.xml") {
-                assertThat(text).contains("android:strokeWidth=\"1.25\"")
-                assertThat(text).contains("#CAC4D0")
-                assertThat(text).contains("1.75,1.75")
-            }
-            if (name.contains("select") && name != "silhouette_select_unselected.xml") {
-                assertThat(text).contains("android:strokeWidth=\"1.5\"")
-                assertThat(text).contains("#49454F")
-                assertThat(text).contains("1.5,1.5")
+            // One outline style for Home and Log (items 7/19): #79747E, 2.0 units.
+            assertThat(text).contains("android:strokeWidth=\"2.0\"")
+            assertThat(text).contains("android:strokeColor=\"#79747E\"")
+            assertThat(text).doesNotContain("#F3EDF7")
+            if (name != "silhouette_display_empty.xml" && name != "silhouette_select_unselected.xml") {
+                assertThat(text).contains("a 2.0,2.0")
             }
         }
     }
@@ -75,8 +72,8 @@ class SilhouetteDrawableTest {
         val dir = drawableDir()
         val rightMid = File(dir, "silhouette_display_right_abdomen_mid.xml").readText()
         val leftMid = File(dir, "silhouette_display_left_abdomen_mid.xml").readText()
-        assertThat(rightMid).contains("57.75,105.0")
-        assertThat(leftMid).contains("78.75,105.0")
+        assertThat(rightMid).contains("57.5,105.0")
+        assertThat(leftMid).contains("78.5,105.0")
         assertThat(InjectionSite.RIGHT_ABDOMEN_MID.viewportX).isEqualTo(59.5f)
         assertThat(InjectionSite.LEFT_ABDOMEN_MID.viewportX).isEqualTo(80.5f)
     }
@@ -87,11 +84,98 @@ class SilhouetteDrawableTest {
         InjectionSite.entries.forEach { site ->
             val display = File(dir, "silhouette_display_${site.zoneId}.xml").readText()
             val select = File(dir, "silhouette_select_${site.zoneId}.xml").readText()
-            val displayStartX = site.viewportX - InjectionSite.DISPLAY_DOT_RADIUS
-            val selectStartX = site.viewportX - InjectionSite.SELECT_CENTER_DOT_RADIUS
+            // Visual 2026-11-14 art: solid r=2.0 dots at the locked centers (legacy files, unwired).
+            val displayStartX = site.viewportX - ART_DOT_RADIUS
+            val selectStartX = site.viewportX - ART_DOT_RADIUS
             assertThat(display).contains("${fmt(displayStartX)},${fmt(site.viewportY)}")
             assertThat(select).contains("${fmt(selectStartX)},${fmt(site.viewportY)}")
         }
+    }
+
+    @Test
+    fun nightVariantsMatchDayGeometry() {
+        val day = drawableDir()
+        val night = File(day.parentFile, "drawable-night")
+        val dayFiles = day.listFiles { f -> f.name.startsWith("silhouette_") }!!.map { it.name }.sorted()
+        val nightFiles = night.listFiles { f -> f.name.startsWith("silhouette_") }!!.map { it.name }.sorted()
+        assertThat(nightFiles).containsExactlyElementsIn(dayFiles)
+        val pathData = Regex("""android:pathData="([^"]+)"""")
+        dayFiles.forEach { name ->
+            val d = pathData.findAll(File(day, name).readText()).map { it.groupValues[1] }.toList()
+            val n = pathData.findAll(File(night, name).readText()).map { it.groupValues[1] }.toList()
+            assertThat(n).containsExactlyElementsIn(d).inOrder()
+        }
+    }
+
+    @Test
+    fun baseArtHasRightMarkerOnScreenLeftAndLeftMarkerOnScreenRight() {
+        listOf("silhouette_display_empty.xml", "silhouette_select_unselected.xml").forEach { name ->
+            val text = File(drawableDir(), name).readText()
+            val r = Regex("""android:name="marker_R"\s+android:pathData="M([0-9.]+)""").find(text)!!
+            val l = Regex("""android:name="marker_L"\s+android:pathData="M([0-9.]+)""").find(text)!!
+            assertThat(r.groupValues[1].toFloat()).isLessThan(InjectionSite.VIEWPORT_WIDTH / 2)
+            assertThat(l.groupValues[1].toFloat()).isGreaterThan(InjectionSite.VIEWPORT_WIDTH / 2)
+        }
+    }
+
+    @Test
+    fun nomarkersVariantsAreBaseArtWithoutRL() {
+        listOf("drawable", "drawable-night").forEach { dirName ->
+            val dir = File(drawableDir().parentFile, dirName)
+            listOf(
+                "silhouette_display_empty" to "silhouette_display_empty_nomarkers",
+                "silhouette_select_unselected" to "silhouette_select_unselected_nomarkers",
+            ).forEach { (base, small) ->
+                val baseText = File(dir, "$base.xml").readText()
+                val smallText = File(dir, "$small.xml").readText()
+                assertThat(baseText).contains("marker_R")
+                assertThat(smallText).doesNotContain("marker_R")
+                assertThat(smallText).doesNotContain("marker_L")
+                assertThat(smallText).doesNotContain("dot_")
+                val body = Regex("""android:name="body_outline"\s+android:pathData="([^"]+)"""")
+                assertThat(body.find(smallText)!!.groupValues[1]).isEqualTo(body.find(baseText)!!.groupValues[1])
+            }
+        }
+    }
+
+    @Test
+    fun codeDrawnSideLabelsSitOnTheBakedGlyphs() {
+        val text = File(drawableDir(), "silhouette_display_empty.xml").readText()
+        fun bbox(name: String): List<Float> {
+            val path = Regex("""android:name="$name"\s+android:pathData="([^"]+)"""").find(text)!!.groupValues[1]
+            // Absolute M/H/V/L/Q coordinates; good enough for a bounding box of these glyphs.
+            val nums = Regex("""-?[0-9]+(?:\.[0-9]+)?""").findAll(path).map { it.value.toFloat() }.toList()
+            val xs = nums.filter { it > 10f && it < 130f && (if (name == "marker_R") it < 40f else it > 100f) }
+            return listOf(xs.min(), xs.max())
+        }
+        val r = bbox("marker_R")
+        val l = bbox("marker_L")
+        assertThat(SideLabels.RIGHT_X).isIn(com.google.common.collect.Range.closed(r[0], r[1]))
+        assertThat(SideLabels.LEFT_X).isIn(com.google.common.collect.Range.closed(l[0], l[1]))
+        assertThat(SideLabels.RIGHT_X).isLessThan(InjectionSite.VIEWPORT_WIDTH / 2) // screen-left = anatomical right
+        assertThat(SideLabels.Y).isIn(com.google.common.collect.Range.closed(18f, 30f))
+        assertThat(SideLabels.TEXT_SP).isEqualTo(14f) // Design Critique round 2: ~14sp bold, both screens
+    }
+
+    @Test
+    fun sideLabelsOnlyWhenTheyFit() {
+        assertThat(SideLabels.fits(178f)).isTrue() // Home with a last site (280 dp tall)
+        assertThat(SideLabels.fits(140f)).isTrue() // Home empty state (220 dp tall)
+        assertThat(SideLabels.fits(80f)).isFalse()
+        // Log at its 1.7 dp/unit floor still shows them.
+        assertThat(SideLabels.fits(ZoneGeometry.LOG_BODY_CROP.width * ZoneGeometry.MIN_DP_PER_UNIT)).isTrue()
+    }
+
+    @Test
+    fun homeAndLogBothUseNomarkersArt() {
+        assertThat(silhouetteBaseDrawableRes(SilhouetteMode.Display))
+            .isEqualTo(com.deeeelay.injectiontracker.R.drawable.silhouette_display_empty_nomarkers)
+        assertThat(silhouetteBaseDrawableRes(SilhouetteMode.Select))
+            .isEqualTo(com.deeeelay.injectiontracker.R.drawable.silhouette_select_unselected_nomarkers)
+    }
+
+    private companion object {
+        const val ART_DOT_RADIUS = 2.0f
     }
 
     private fun fmt(value: Float): String {

@@ -38,6 +38,11 @@ Reminders: day-before fires at the same clock as the injection minus 24 hours; a
 
 Data stays on-device (DataStore + Room). There is no account, backend, export, heatmap, back-body map, Watch/iOS client, or multi-med support.
 
+
+## Locked injection zones
+
+The 18 zone ids and cx/cy positions are locked in `app/src/main/assets/silhouette_zones.json` (sha256 `4d44e5a37fba60f3597669e32c7b7a6899ce3ee822831bcc226262fbd56b13d2`). Display labels map the locked ids (proximal / mid / distal) to upper / mid / lower.
+
 ## Tests
 
 Unit tests cover scheduling math (interval, done/missed advancing from the terminal log timestamp, regimen recalculation, day-before = due − 24h) and the locked zone coordinates.

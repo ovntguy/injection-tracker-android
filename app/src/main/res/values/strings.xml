@@ -39,6 +39,8 @@
 
     <string name="log_done_title">Log injection</string>
     <string name="log_done_tap_site">Tap where you injected</string>
+    <string name="silhouette_side_right">R</string>
+    <string name="silhouette_side_left">L</string>
     <string name="log_readout_empty">Tap a spot on the figure</string>
     <string name="log_readout_last_time">Last time: %1$s · %2$s</string>
 

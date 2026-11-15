@@ -1,219 +1,203 @@
 {
-  "version": "v1.1-lr-swap",
-  "centersVersion": "v2-tighter-bands",
   "viewport": {
     "width": 140,
     "height": 220
   },
   "zoneCount": 18,
-  "displayDotRadius": 1.75,
+  "displayDotRadius": 2.0,
   "selectCenterDotRadius": 1.5,
   "hitTargetDp": 48,
-  "bodyFill": "#F3EDF7",
-  "displayStroke": "#CAC4D0",
-  "selectStroke": "#49454F",
-  "hitRegionsLocked": true,
+  "bodyFill": "#0F79747E",
+  "displayStroke": "#79747E",
+  "selectStroke": "#79747E",
   "style": "exact-trace-athletic-contour",
   "styleRef": "refs/human-contour-ref.jpg",
-  "notes": "Design-locked zones.json v1.1-lr-swap. Centers unchanged from v2-tighter-bands. Facing silhouette: screen-left (low cx) = anatomical right_*; screen-right (high cx) = left_*. Same exact-trace outline pathData as silhouette_display_empty.xml. Period dots only. Nearest-center hit >=48dp from JSON cx/cy. hitRegionsLocked=true.",
+  "hitRegionsLocked": true,
+  "anatomicalBounds": {
+    "upper_arm": "deltoid to above elbow \u2014 NOT forearm",
+    "abdomen": "below ribs to above inguinal crease",
+    "upper_thigh": "below inguinal to mid upper thigh above knee \u2014 NOT shin"
+  },
+  "hitLockNote": "Design PASS v2 geometry + v1.1 L\u2194R id/label swap (2026-09-10). Centers unchanged; Left\u2194Right names flipped so screen-left is right_*. Eng \u226548dp nearest-center. Missed does not move last-site period dot.",
+  "notes": "18-zone lock (Big Dawg). v1.1 L\u2194R FIX: ids/labels swapped Left\u2194Right; cx/cy unchanged (v2 geometry). Screen-left = anatomical right_* on facing silhouette. HIT REGIONS LOCKED. Period last-site; Missed does not move dot.",
   "zones": [
     {
       "id": "right_upper_arm_proximal",
       "label": "Right upper arm (high)",
       "cx": 47.0,
       "cy": 60.0,
-      "bands": {
-        "side": "right",
-        "region": "upper_arm",
-        "band": "proximal"
-      }
+      "side": "right",
+      "region": "upper_arm",
+      "band": "proximal"
     },
     {
       "id": "right_upper_arm_mid",
       "label": "Right upper arm (mid)",
       "cx": 45.5,
       "cy": 73.0,
-      "bands": {
-        "side": "right",
-        "region": "upper_arm",
-        "band": "mid"
-      }
+      "side": "right",
+      "region": "upper_arm",
+      "band": "mid"
     },
     {
       "id": "right_upper_arm_distal",
       "label": "Right upper arm (low)",
       "cx": 44.5,
       "cy": 86.0,
-      "bands": {
-        "side": "right",
-        "region": "upper_arm",
-        "band": "distal"
-      }
+      "side": "right",
+      "region": "upper_arm",
+      "band": "distal"
     },
     {
       "id": "left_upper_arm_proximal",
       "label": "Left upper arm (high)",
       "cx": 93.0,
       "cy": 60.0,
-      "bands": {
-        "side": "left",
-        "region": "upper_arm",
-        "band": "proximal"
-      }
+      "side": "left",
+      "region": "upper_arm",
+      "band": "proximal"
     },
     {
       "id": "left_upper_arm_mid",
       "label": "Left upper arm (mid)",
       "cx": 94.5,
       "cy": 73.0,
-      "bands": {
-        "side": "left",
-        "region": "upper_arm",
-        "band": "mid"
-      }
+      "side": "left",
+      "region": "upper_arm",
+      "band": "mid"
     },
     {
       "id": "left_upper_arm_distal",
       "label": "Left upper arm (low)",
       "cx": 95.5,
       "cy": 86.0,
-      "bands": {
-        "side": "left",
-        "region": "upper_arm",
-        "band": "distal"
-      }
+      "side": "left",
+      "region": "upper_arm",
+      "band": "distal"
     },
     {
       "id": "right_abdomen_proximal",
       "label": "Right abdomen (upper)",
       "cx": 60.0,
       "cy": 92.0,
-      "bands": {
-        "side": "right",
-        "region": "abdomen",
-        "band": "proximal"
-      }
+      "side": "right",
+      "region": "abdomen",
+      "band": "proximal"
     },
     {
       "id": "right_abdomen_mid",
       "label": "Right abdomen (mid)",
       "cx": 59.5,
       "cy": 105.0,
-      "bands": {
-        "side": "right",
-        "region": "abdomen",
-        "band": "mid"
-      }
+      "side": "right",
+      "region": "abdomen",
+      "band": "mid"
     },
     {
       "id": "right_abdomen_distal",
       "label": "Right abdomen (lower)",
       "cx": 59.5,
       "cy": 118.0,
-      "bands": {
-        "side": "right",
-        "region": "abdomen",
-        "band": "distal"
-      }
+      "side": "right",
+      "region": "abdomen",
+      "band": "distal"
     },
     {
       "id": "left_abdomen_proximal",
       "label": "Left abdomen (upper)",
       "cx": 80.0,
       "cy": 92.0,
-      "bands": {
-        "side": "left",
-        "region": "abdomen",
-        "band": "proximal"
-      }
+      "side": "left",
+      "region": "abdomen",
+      "band": "proximal"
     },
     {
       "id": "left_abdomen_mid",
       "label": "Left abdomen (mid)",
       "cx": 80.5,
       "cy": 105.0,
-      "bands": {
-        "side": "left",
-        "region": "abdomen",
-        "band": "mid"
-      }
+      "side": "left",
+      "region": "abdomen",
+      "band": "mid"
     },
     {
       "id": "left_abdomen_distal",
       "label": "Left abdomen (lower)",
       "cx": 80.5,
       "cy": 118.0,
-      "bands": {
-        "side": "left",
-        "region": "abdomen",
-        "band": "distal"
-      }
+      "side": "left",
+      "region": "abdomen",
+      "band": "distal"
     },
     {
       "id": "right_upper_thigh_proximal",
       "label": "Right thigh (high)",
       "cx": 61.0,
       "cy": 134.0,
-      "bands": {
-        "side": "right",
-        "region": "upper_thigh",
-        "band": "proximal"
-      }
+      "side": "right",
+      "region": "upper_thigh",
+      "band": "proximal"
     },
     {
       "id": "right_upper_thigh_mid",
       "label": "Right thigh (mid)",
       "cx": 61.0,
       "cy": 146.0,
-      "bands": {
-        "side": "right",
-        "region": "upper_thigh",
-        "band": "mid"
-      }
+      "side": "right",
+      "region": "upper_thigh",
+      "band": "mid"
     },
     {
       "id": "right_upper_thigh_distal",
       "label": "Right thigh (low)",
       "cx": 60.5,
       "cy": 158.0,
-      "bands": {
-        "side": "right",
-        "region": "upper_thigh",
-        "band": "distal"
-      }
+      "side": "right",
+      "region": "upper_thigh",
+      "band": "distal"
     },
     {
       "id": "left_upper_thigh_proximal",
       "label": "Left thigh (high)",
       "cx": 79.0,
       "cy": 134.0,
-      "bands": {
-        "side": "left",
-        "region": "upper_thigh",
-        "band": "proximal"
-      }
+      "side": "left",
+      "region": "upper_thigh",
+      "band": "proximal"
     },
     {
       "id": "left_upper_thigh_mid",
       "label": "Left thigh (mid)",
       "cx": 79.0,
       "cy": 146.0,
-      "bands": {
-        "side": "left",
-        "region": "upper_thigh",
-        "band": "mid"
-      }
+      "side": "left",
+      "region": "upper_thigh",
+      "band": "mid"
     },
     {
       "id": "left_upper_thigh_distal",
       "label": "Left thigh (low)",
       "cx": 79.5,
       "cy": 158.0,
-      "bands": {
-        "side": "left",
-        "region": "upper_thigh",
-        "band": "distal"
-      }
+      "side": "left",
+      "region": "upper_thigh",
+      "band": "distal"
     }
-  ]
+  ],
+  "centersVersion": "v2-tighter-bands",
+  "version": "v1.1-lr-swap",
+  "displayDotFill": "#6750A4",
+  "displayDotFillNight": "#D0BCFF",
+  "displayStrokeWidth": 2.0,
+  "bodyFillNote": "#79747E at 6% alpha (ARGB), matches shipped art; flattened on #FFFBFE = #F7F3F6",
+  "styleUpdated": "2026-11-14 Visual new silhouette art; style fields only, zones unchanged",
+  "displayDotRadiusNote": "Art-only (baked preview drawables). In-app markers are drawn in code at dp sizes per the Injection Tracker polish spec (2026-11-14); do not scale from viewBox radii.",
+  "deprecatedDrawables": "Per-zone display_* / select_* drawables are DEPRECATED (2026-11-14). Android draws markers in code over display_empty / select_unselected.",
+  "bodyBounds": {
+    "x": 32.9,
+    "y": 5.0,
+    "width": 74.2,
+    "height": 210.0,
+    "note": "Silhouette path extents in viewBox units; scale the figure by these, not the 140x220 frame."
+  }
 }
