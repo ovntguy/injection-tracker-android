@@ -1,14 +1,15 @@
 package com.deeeelay.injectiontracker.ui.screens.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -25,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -166,7 +166,7 @@ private fun MonthGrid(
                             modifier = Modifier.weight(1f),
                         )
                     } else {
-                        Box(Modifier.weight(1f).aspectRatio(1f))
+                        Box(Modifier.weight(1f).height(DayCellHeight))
                     }
                     cell++
                 }
@@ -185,31 +185,38 @@ private fun DayCell(
     modifier: Modifier = Modifier,
 ) {
     val scheme = MaterialTheme.colorScheme
+    val circle = Modifier.size(DateCircle).then(
+        when {
+            selected -> Modifier.background(scheme.primaryContainer, CircleShape)
+            today -> Modifier.border(TodayOutline, scheme.primary, CircleShape)
+            else -> Modifier
+        },
+    )
+    val numberColor = when {
+        selected -> scheme.onPrimaryContainer
+        today -> scheme.primary
+        else -> scheme.onSurface
+    }
     Column(
         modifier = modifier
-            .aspectRatio(1f)
-            .padding(2.dp)
-            .clip(MaterialTheme.shapes.small)
-            .background(if (today && !selected) scheme.surfaceVariant else Color.Transparent)
-            .clickable(onClick = onSelect)
-            .padding(2.dp),
+            .height(DayCellHeight)
+            .clickable(onClick = onSelect),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Item 10: the selected day gets an M3 filled date circle in primary.
-        Box(
-            modifier = Modifier
-                .size(DateCircle)
-                .then(if (selected) Modifier.background(scheme.primary, CircleShape) else Modifier),
-            contentAlignment = Alignment.Center,
-        ) {
+        Box(modifier = circle, contentAlignment = Alignment.Center) {
             Text(
                 text = date.dayOfMonth.toString(),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (today) FontWeight.Bold else FontWeight.Normal,
-                color = if (selected) scheme.onPrimary else scheme.onSurface,
+                color = numberColor,
             )
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+        // Markers sit 2 dp below the circle, 2 dp apart, centered.
+        Row(
+            modifier = Modifier.padding(top = MarkerGap),
+            horizontalArrangement = Arrangement.spacedBy(MarkerGap),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             if (marks?.hasCompleted == true) DoneGlyph(CellGlyph)
             if (marks?.hasMissed == true) MissedGlyph(CellGlyph)
             if (marks?.hasUpcoming == true) UpcomingGlyph(CellGlyph)
@@ -217,9 +224,14 @@ private fun DayCell(
     }
 }
 
-private val DateCircle = 28.dp
+private val DateCircle = 40.dp
+private val TodayOutline = 1.dp
+private val MarkerGap = 2.dp
 private val CellGlyph = 8.dp
 private val LegendGlyph = 12.dp
+
+/** 40 dp circle + 2 dp gap + glyph row + 2 dp so the next week does not collide with markers. */
+private val DayCellHeight = DateCircle + MarkerGap + CellGlyph + MarkerGap
 
 /** Same vectors in the cells, the legend and the detail rows (item 9). */
 @Composable
