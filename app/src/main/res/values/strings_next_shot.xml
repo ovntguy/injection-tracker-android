@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Item 16 relative due time (Design polish spec, BUILD FROM HERE). Shared by Home (P3) and Calendar (P4). -->
+<resources>
+    <plurals name="next_in_days">
+        <item quantity="one">in %d day</item>
+        <item quantity="other">in %d days</item>
+    </plurals>
+    <string name="next_tomorrow">tomorrow</string>
+    <string name="next_today_in_hours">today, in %d h</string>
+    <string name="next_in_minutes">in %d min</string>
+    <string name="next_due_now">due now</string>
+    <string name="next_overdue_by_hours">overdue by %d h</string>
+    <string name="next_overdue_by_minutes">overdue by %d min</string>
+    <plurals name="next_days_overdue">
+        <item quantity="one">%d day overdue</item>
+        <item quantity="other">%d days overdue</item>
+    </plurals>
+</resources>

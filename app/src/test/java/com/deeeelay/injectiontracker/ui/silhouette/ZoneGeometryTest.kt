@@ -144,6 +144,9 @@ class ZoneGeometryTest {
         assertThat(ZoneGeometry.SELECTED_CHECK_DP).isEqualTo(12f)
         assertThat(ZoneGeometry.LAST_SITE_DOT_DP).isEqualTo(6f)
         assertThat(ZoneGeometry.HOME_DOT_DP).isEqualTo(10f)
+        assertThat(ZoneGeometry.HOME_HALO_DP).isEqualTo(1.5f)
+        assertThat(ZoneGeometry.HOME_RING_STROKE_DP).isEqualTo(1.5f)
+        assertThat(ZoneGeometry.HOME_MARKER_DP).isEqualTo(16f)
         assertThat(ZoneGeometry.REJECT_DISTANCE_DP).isEqualTo(28f)
     }
 

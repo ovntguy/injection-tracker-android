@@ -93,6 +93,7 @@ class P1LogAndHomeSnapshotTest(private val night: Boolean) {
                         frequency = Frequency.EVERY_OTHER_WEEK,
                         nextInjectionAt = ZonedDateTime.of(2026, 11, 21, 17, 50, 0, 0, zone).toInstant(),
                         lastSite = InjectionSite.RIGHT_UPPER_THIGH_MID,
+                        lastSiteAt = lastAt,
                     ),
                     remindersWanted = false,
                     notificationsAllowed = true,
@@ -100,6 +101,8 @@ class P1LogAndHomeSnapshotTest(private val night: Boolean) {
                     onMarkMissed = {},
                     onEditRegimen = {},
                     onEnableNotifications = {},
+                    now = ZonedDateTime.of(2026, 11, 14, 10, 0, 0, 0, zone).toInstant(),
+                    zone = zone,
                 )
             }
         }

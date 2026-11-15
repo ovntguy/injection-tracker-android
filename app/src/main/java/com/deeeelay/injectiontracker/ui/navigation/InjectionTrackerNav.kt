@@ -11,6 +11,9 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,7 +52,7 @@ private object Routes {
     const val EditRegimen = "edit_regimen"
 }
 
-private enum class MainTab { Home, Calendar, Settings }
+enum class MainTab { Home, Calendar, Settings }
 
 @Composable
 fun InjectionTrackerNav(
@@ -101,26 +104,7 @@ private fun MainTabs(
     var tab by rememberSaveable { mutableStateOf(MainTab.Home) }
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                NavigationBarItem(
-                    selected = tab == MainTab.Home,
-                    onClick = { tab = MainTab.Home },
-                    icon = { Icon(Icons.Filled.Home, contentDescription = null) },
-                    label = { Text(stringResource(R.string.nav_home)) },
-                )
-                NavigationBarItem(
-                    selected = tab == MainTab.Calendar,
-                    onClick = { tab = MainTab.Calendar },
-                    icon = { Icon(Icons.Filled.CalendarMonth, contentDescription = null) },
-                    label = { Text(stringResource(R.string.nav_calendar)) },
-                )
-                NavigationBarItem(
-                    selected = tab == MainTab.Settings,
-                    onClick = { tab = MainTab.Settings },
-                    icon = { Icon(Icons.Filled.Settings, contentDescription = null) },
-                    label = { Text(stringResource(R.string.nav_settings)) },
-                )
-            }
+            MainNavigationBar(selected = tab, onSelect = { tab = it })
         },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
@@ -146,3 +130,45 @@ private fun MainTabs(
         }
     }
 }
+
+/**
+ * Bottom nav (Design polish spec, item 11): indicator secondaryContainer, selected icon
+ * onSecondaryContainer, selected label onSurface, unselected icon and label onSurfaceVariant,
+ * all from the seed-#6750A4 scheme; no hex here.
+ */
+@Composable
+fun MainNavigationBar(selected: MainTab, onSelect: (MainTab) -> Unit) {
+    val scheme = MaterialTheme.colorScheme
+    val colors = NavigationBarItemDefaults.colors(
+        indicatorColor = scheme.secondaryContainer,
+        selectedIconColor = scheme.onSecondaryContainer,
+        selectedTextColor = scheme.onSurface,
+        unselectedIconColor = scheme.onSurfaceVariant,
+        unselectedTextColor = scheme.onSurfaceVariant,
+    )
+    NavigationBar {
+        MainTab.entries.forEach { tab ->
+            NavigationBarItem(
+                selected = tab == selected,
+                onClick = { onSelect(tab) },
+                icon = { Icon(tab.icon, contentDescription = null) },
+                label = { Text(stringResource(tab.label)) },
+                colors = colors,
+            )
+        }
+    }
+}
+
+private val MainTab.icon: ImageVector
+    get() = when (this) {
+        MainTab.Home -> Icons.Filled.Home
+        MainTab.Calendar -> Icons.Filled.CalendarMonth
+        MainTab.Settings -> Icons.Filled.Settings
+    }
+
+private val MainTab.label: Int
+    get() = when (this) {
+        MainTab.Home -> R.string.nav_home
+        MainTab.Calendar -> R.string.nav_calendar
+        MainTab.Settings -> R.string.nav_settings
+    }

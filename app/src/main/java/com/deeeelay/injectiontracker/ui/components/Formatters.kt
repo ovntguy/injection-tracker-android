@@ -29,6 +29,16 @@ object Formatters {
         return "${dateMedium.format(zdt)} · ${timeShort.format(zdt)}"
     }
 
+    private val monthDay: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d")
+    private val monthDayYear: DateTimeFormatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+
+    /** Design polish spec date: `MMM d`, plus `, yyyy` only when it is not the current year. */
+    fun shortDate(instant: Instant, now: Instant, zone: ZoneId = ZoneId.systemDefault()): String {
+        val date = instant.atZone(zone)
+        val sameYear = date.year == now.atZone(zone).year
+        return (if (sameYear) monthDay else monthDayYear).format(date)
+    }
+
     fun monthTitle(yearMonth: java.time.YearMonth, locale: Locale = Locale.getDefault()): String {
         val month = yearMonth.month.getDisplayName(TextStyle.FULL, locale)
         return "$month ${yearMonth.year}"

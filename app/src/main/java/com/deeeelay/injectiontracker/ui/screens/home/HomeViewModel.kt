@@ -21,6 +21,8 @@ data class HomeUiState(
     val nextInjectionAt: Instant? = null,
     val overdue: Boolean = false,
     val lastSite: InjectionSite? = null,
+    /** When [lastSite] was logged (last done log, never a miss). */
+    val lastSiteAt: Instant? = null,
 )
 
 class HomeViewModel(
@@ -37,6 +39,7 @@ class HomeViewModel(
                 nextInjectionAt = regimen?.nextInjectionAt,
                 overdue = regimen?.let { Scheduling.isOverdue(it.nextInjectionAt, Instant.now()) } == true,
                 lastSite = snap.lastDoneSite,
+                lastSiteAt = snap.lastDoneLog?.loggedAt,
             )
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
