@@ -2,11 +2,14 @@ package com.deeeelay.injectiontracker.ui
 
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import com.deeeelay.injectiontracker.domain.Frequency
 import com.deeeelay.injectiontracker.domain.InjectionLog
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.LogType
+import com.deeeelay.injectiontracker.domain.Regimen
 import com.deeeelay.injectiontracker.domain.TrackerSnapshot
 import com.deeeelay.injectiontracker.ui.components.Formatters
+import com.deeeelay.injectiontracker.ui.screens.home.HomeUiState
 import com.deeeelay.injectiontracker.ui.theme.LightColors
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -82,6 +85,44 @@ class HomeStringsAndThemeTest {
         assertThat(snap.lastDoneSite).isEqualTo(InjectionSite.RIGHT_UPPER_THIGH_MID)
         val onlyMissed = snap.copy(logs = snap.logs.filter { it.type == LogType.MISSED })
         assertThat(onlyMissed.lastDoneLog).isNull()
+    }
+
+    @Test
+    fun onlyMissedLogsShowNoShotsLoggedYet() {
+        val zone = ZoneId.of("America/Chicago")
+        val missedAt = ZonedDateTime.of(2026, 11, 7, 17, 50, 0, 0, zone).toInstant()
+        val due = ZonedDateTime.of(2026, 11, 21, 17, 50, 0, 0, zone).toInstant()
+        val snap = TrackerSnapshot(
+            setupComplete = true,
+            regimen = Regimen(
+                medicineName = "Hyrimoz",
+                dosage = "40mg/0.4mL",
+                frequency = Frequency.EVERY_OTHER_WEEK,
+                startDateTime = missedAt,
+                nextInjectionAt = due,
+            ),
+            logs = listOf(InjectionLog("m1", LogType.MISSED, missedAt, site = null)),
+            dayBeforeEnabled = false,
+            atTimeEnabled = false,
+        )
+        assertThat(snap.lastDoneLog).isNull()
+        assertThat(snap.lastDoneSite).isNull()
+
+        // Same mapping HomeViewModel uses: missed logs never set the last-site label or marker.
+        val state = HomeUiState(
+            loading = false,
+            medicineName = snap.regimen!!.medicineName,
+            dosage = snap.regimen!!.dosage,
+            frequency = snap.regimen!!.frequency,
+            nextInjectionAt = snap.regimen!!.nextInjectionAt,
+            lastSite = snap.lastDoneSite,
+            lastSiteAt = snap.lastDoneLog?.loggedAt,
+        )
+        assertThat(state.lastSite).isNull()
+        assertThat(state.lastSiteAt).isNull()
+        assertThat(state.nextInjectionAt).isEqualTo(due)
+        // LastSiteRow shows this exact string when lastSite and lastSiteAt are null.
+        assertThat(string("home_no_shots_yet")).isEqualTo("No shots logged yet")
     }
 
     @Test
