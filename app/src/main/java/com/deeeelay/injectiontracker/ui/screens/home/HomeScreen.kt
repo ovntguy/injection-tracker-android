@@ -85,13 +85,7 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val missedMessage = stringResource(R.string.home_marked_missed)
     // Item 16: the relative "Next shot" line refreshes on resume and every minute while visible.
-    var now by remember { mutableStateOf(Instant.now()) }
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(60_000L - (System.currentTimeMillis() % 60_000L))
-            now = Instant.now()
-        }
-    }
+    val now = rememberHomeNow()
     val context = LocalContext.current
     var notificationsAllowed by remember { mutableStateOf(areNotificationsEnabled(context)) }
 
@@ -113,7 +107,6 @@ fun HomeScreen(
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
                 notificationsAllowed = areNotificationsEnabled(context)
-                now = Instant.now()
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
@@ -417,6 +410,31 @@ private fun LastSiteRow(state: HomeUiState, now: Instant, zone: ZoneId, figureHe
     }
 }
 
+
+
+/**
+ * Clock for the relative next-shot line (item 16). Refreshes on lifecycle
+ * ON_RESUME and again at the start of every minute while Home is visible.
+ */
+@Composable
+fun rememberHomeNow(): Instant {
+    var now by remember { mutableStateOf(Instant.now()) }
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) now = Instant.now()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(60_000L - (System.currentTimeMillis() % 60_000L))
+            now = Instant.now()
+        }
+    }
+    return now
+}
 
 private fun areNotificationsEnabled(context: Context): Boolean {
     val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

@@ -139,7 +139,7 @@ fun silhouetteDrawableName(mode: SilhouetteMode, site: InjectionSite?): String {
 /**
  * Silhouette with code-drawn zone markers.
  *
- * - [SilhouetteMode.Display] (Home): [markedSite] is the last site, drawn as the 17 dp Home marker.
+ * - [SilhouetteMode.Display] (Home): [markedSite] is the last site, drawn as the 16 dp Home marker.
  * - [SilhouetteMode.Select] (Log): all 18 zones show a 14 dp hollow ring; [lastSite] gets a
  *   center dot; [markedSite] is the selection (20 dp disc + check). Taps within [hitPadding] of
  *   the figure snap to the nearest zone; taps > 28 dp from every center are ignored.
@@ -153,7 +153,7 @@ fun InjectionSilhouette(
     hitPadding: Dp = 0.dp,
     window: ZoneGeometry.ViewWindow = ZoneGeometry.FULL_FRAME,
     description: String? = null,
-    /** Overall last-site marker diameter on Home; defaults to the 17 dp (spec "16 dp") glyph. */
+    /** Overall last-site marker diameter on Home; defaults to the 16 dp glyph. */
     homeMarkerDiameterDp: Float = ZoneGeometry.HOME_MARKER_DP,
     /** When true, R/L are omitted even if the figure is wide enough (Home compact height). */
     hideSideLabels: Boolean = false,

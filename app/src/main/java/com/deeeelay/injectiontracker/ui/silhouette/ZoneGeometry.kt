@@ -43,7 +43,7 @@ object ZoneGeometry {
     const val SELECTED_CHECK_DP = 12f
     const val SELECTED_STROKE_DP = 2f
     const val HOME_DOT_DP = 10f
-    const val HOME_HALO_DP = 2f
+    const val HOME_HALO_DP = 1.5f
     const val HOME_RING_STROKE_DP = 1.5f
 
     /** Home marker overall diameter: dot + halo + ring on both sides. */
