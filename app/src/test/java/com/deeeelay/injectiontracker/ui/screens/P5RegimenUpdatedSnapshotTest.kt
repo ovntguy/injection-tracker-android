@@ -53,11 +53,15 @@ private val homeState = HomeUiState(
 )
 
 @Composable
-private fun ScreenWithSnackbar(tab: MainTab, content: @Composable () -> Unit) = InjectionTrackerTheme {
+private fun ScreenWithSnackbar(
+    tab: MainTab,
+    messageRes: Int = R.string.snackbar_regimen_updated,
+    content: @Composable () -> Unit,
+) = InjectionTrackerTheme {
     Scaffold(
         snackbarHost = {
             Snackbar(modifier = Modifier.padding(12.dp)) {
-                Text(stringResource(R.string.snackbar_regimen_updated))
+                Text(stringResource(messageRes))
             }
         },
         bottomBar = { MainNavigationBar(selected = tab, onSelect = {}) },
@@ -72,7 +76,7 @@ private fun SettingsShot() = ScreenWithSnackbar(MainTab.Settings) {
 }
 
 @Composable
-private fun HomeShot() = ScreenWithSnackbar(MainTab.Home) {
+private fun HomeShot(messageRes: Int = R.string.snackbar_regimen_updated) = ScreenWithSnackbar(MainTab.Home, messageRes) {
     HomeContent(
         state = homeState,
         remindersWanted = false,
@@ -107,6 +111,11 @@ class P5RegimenUpdatedSnapshotTest(private val night: Boolean) {
 
     @Test
     fun homeSnackbar() = paparazzi.snapshot("home_regimen_updated_$mode") { HomeShot() }
+
+    @Test
+    fun homeMissedSnackbar() = paparazzi.snapshot("home_marked_missed_$mode") {
+        HomeShot(R.string.home_marked_missed)
+    }
 }
 
 /** 360×640 dp with the nav bar, the placement the snackbar is written for. */
@@ -131,4 +140,9 @@ class P5RegimenUpdatedSmallScreenSnapshotTest(private val night: Boolean) {
 
     @Test
     fun homeSnackbar() = paparazzi.snapshot("home_small_regimen_updated_$mode") { HomeShot() }
+
+    @Test
+    fun homeMissedSnackbar() = paparazzi.snapshot("home_small_marked_missed_$mode") {
+        HomeShot(R.string.home_marked_missed)
+    }
 }

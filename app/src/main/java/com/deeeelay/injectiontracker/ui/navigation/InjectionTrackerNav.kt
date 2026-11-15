@@ -20,6 +20,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,6 +37,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.data.repo.TrackerRepository
 import com.deeeelay.injectiontracker.ui.screens.calendar.CalendarScreen
@@ -127,16 +129,23 @@ private fun MainTabs(
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.Home) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
     val showUpdated by regimenUpdated.collectAsStateWithLifecycle()
     val updatedMessage = stringResource(R.string.snackbar_regimen_updated)
+    val missedMessage = stringResource(R.string.home_marked_missed)
+    fun showTabSnackbar(message: String) {
+        scope.launch {
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(
+                message = message,
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
     LaunchedEffect(showUpdated) {
         if (showUpdated) {
             onRegimenUpdatedShown()
-            snackbarHostState.currentSnackbarData?.dismiss()
-            snackbarHostState.showSnackbar(
-                message = updatedMessage,
-                duration = SnackbarDuration.Short,
-            )
+            showTabSnackbar(updatedMessage)
         }
     }
     Scaffold(
@@ -152,6 +161,7 @@ private fun MainTabs(
                         remindersWanted = remindersWanted,
                         onLogInjection = onLogInjection,
                         onEditRegimen = onEditRegimen,
+                        onMissedLogged = { showTabSnackbar(missedMessage) },
                     )
                 }
                 MainTab.Calendar -> {
