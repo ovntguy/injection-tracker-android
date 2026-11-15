@@ -15,3 +15,6 @@
 *.class
 kotlin-js-store
 .kotlin
+*.jks
+*.keystore
+keystore.properties
