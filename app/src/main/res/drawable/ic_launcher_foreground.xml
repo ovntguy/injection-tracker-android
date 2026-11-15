@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- 2026-11-14 fix-list #5: glyph scaled 85% about bbox center, bbox center moved to (54,54); all points inside 66dp safe circle. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path android:fillColor="#FFFFFFFF"
-        android:pathData="M54,26 m-15,0 a15,15 0 1,1 30,0 a15,15 0 1,1 -30,0"/>
+        android:pathData="M54,36.575 m-12.75,0 a12.75,12.75 0 1,1 25.5,0 a12.75,12.75 0 1,1 -25.5,0"/>
     <path android:fillColor="#FFFFFFFF"
-        android:pathData="M41,32 h26 v50 h-26 z"/>
+        android:pathData="M42.95,41.675 L65.05,41.675 L65.05,84.175 L42.95,84.175 z"/>
     <path android:fillColor="#FFFFFFFF"
-        android:pathData="M41,46 L18,58 L26,72 L49,60 z"/>
+        android:pathData="M42.95,53.575 L23.4,63.775 L30.2,75.675 L49.75,65.475 z"/>
     <path android:fillColor="#FFFFFFFF"
-        android:pathData="M67,46 L90,58 L82,72 L59,60 z"/>
+        android:pathData="M65.05,53.575 L84.6,63.775 L77.8,75.675 L58.25,65.475 z"/>
 </vector>
