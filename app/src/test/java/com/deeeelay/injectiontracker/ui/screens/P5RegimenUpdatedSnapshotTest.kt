@@ -32,6 +32,8 @@ import java.time.ZonedDateTime
 import java.time.ZoneId
 
 private val zone: ZoneId = ZoneId.of("America/Chicago")
+private val now = ZonedDateTime.of(2026, 11, 14, 10, 0, 0, 0, zone).toInstant()
+private val lastAt = ZonedDateTime.of(2026, 11, 7, 17, 50, 0, 0, zone).toInstant()
 private val due = ZonedDateTime.of(2026, 11, 21, 17, 50, 0, 0, zone).toInstant()
 
 private val settingsState = SettingsUiState(
@@ -47,6 +49,7 @@ private val homeState = HomeUiState(
     frequency = Frequency.EVERY_OTHER_WEEK,
     nextInjectionAt = due,
     lastSite = InjectionSite.RIGHT_UPPER_THIGH_MID,
+    lastSiteAt = lastAt,
 )
 
 @Composable
@@ -78,6 +81,8 @@ private fun HomeShot() = ScreenWithSnackbar(MainTab.Home) {
         onMarkMissed = {},
         onEditRegimen = {},
         onEnableNotifications = {},
+        now = now,
+        zone = zone,
     )
 }
 
