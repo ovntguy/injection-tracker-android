@@ -49,11 +49,14 @@
     <string name="missed_body">Your next dose will be scheduled from now, not the original due time. No site is recorded.</string>
 
     <string name="calendar_title">Calendar</string>
-    <string name="calendar_completed">Completed</string>
+    <string name="calendar_done">Done</string>
     <string name="calendar_missed">Missed</string>
     <string name="calendar_upcoming">Upcoming</string>
-    <string name="calendar_empty_day">No entries on this day.</string>
-    <string name="calendar_legend">Completed circle · Missed diamond · Upcoming outline</string>
+    <string name="calendar_nothing_logged">Nothing logged this day</string>
+    <string name="calendar_row_done">Done · %1$s</string>
+    <string name="calendar_row_missed">Marked at %1$s</string>
+    <string name="calendar_row_next_shot">Next shot</string>
+    <string name="calendar_row_upcoming">%1$s · %2$s</string>
 
     <string name="settings_title">Settings</string>
     <string name="settings_reminders">Reminders</string>

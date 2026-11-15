@@ -1,14 +1,15 @@
 package com.deeeelay.injectiontracker.ui.screens.calendar
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -17,8 +18,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -40,7 +38,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.ui.components.Formatters
-import com.deeeelay.injectiontracker.ui.silhouette.siteLabel
+import com.deeeelay.injectiontracker.domain.NextShotRelative
+import com.deeeelay.injectiontracker.domain.ZoneReadout
+import com.deeeelay.injectiontracker.ui.components.nextShotRelativeText
+import androidx.compose.material3.ListItem
+import androidx.compose.ui.unit.Dp
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -50,7 +55,23 @@ import java.util.Locale
 @Composable
 fun CalendarScreen(viewModel: CalendarViewModel) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    CalendarContent(
+        state = state,
+        onPrev = viewModel::previousMonth,
+        onNext = viewModel::nextMonth,
+        onSelect = viewModel::selectDate,
+    )
+}
 
+@Composable
+fun CalendarContent(
+    state: CalendarUiState,
+    onPrev: () -> Unit,
+    onNext: () -> Unit,
+    onSelect: (LocalDate) -> Unit,
+    now: Instant = Instant.now(),
+    zone: ZoneId = ZoneId.systemDefault(),
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -58,23 +79,18 @@ fun CalendarScreen(viewModel: CalendarViewModel) {
             .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        MonthHeader(
-            month = state.month,
-            onPrev = viewModel::previousMonth,
-            onNext = viewModel::nextMonth,
-        )
+        MonthHeader(month = state.month, onPrev = onPrev, onNext = onNext)
         MonthGrid(
             month = state.month,
+            today = state.today,
             selected = state.selectedDate,
             marks = state.marksByDate,
-            onSelect = viewModel::selectDate,
+            onSelect = onSelect,
         )
-        Text(
-            stringResource(R.string.calendar_legend),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        SelectedDayList(state.selectedEntries)
+        CalendarLegend()
+        state.selectedDate?.let { date ->
+            DayDetail(date = date, entries = state.selectedEntries, today = state.today, now = now, zone = zone)
+        }
     }
 }
 
@@ -102,7 +118,8 @@ private fun MonthHeader(month: YearMonth, onPrev: () -> Unit, onNext: () -> Unit
 @Composable
 private fun MonthGrid(
     month: YearMonth,
-    selected: LocalDate,
+    today: LocalDate,
+    selected: LocalDate?,
     marks: Map<LocalDate, DayMarks>,
     onSelect: (LocalDate) -> Unit,
 ) {
@@ -142,13 +159,14 @@ private fun MonthGrid(
                         val date = month.atDay(dayIndex)
                         DayCell(
                             date = date,
+                            today = date == today,
                             selected = date == selected,
                             marks = marks[date],
                             onSelect = { onSelect(date) },
                             modifier = Modifier.weight(1f),
                         )
                     } else {
-                        Box(Modifier.weight(1f).aspectRatio(1f))
+                        Box(Modifier.weight(1f).height(DayCellHeight))
                     }
                     cell++
                 }
@@ -160,72 +178,80 @@ private fun MonthGrid(
 @Composable
 private fun DayCell(
     date: LocalDate,
+    today: Boolean,
     selected: Boolean,
     marks: DayMarks?,
     onSelect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val today = date == LocalDate.now()
-    val bg = when {
-        selected -> MaterialTheme.colorScheme.primaryContainer
-        today -> MaterialTheme.colorScheme.surfaceVariant
-        else -> Color.Transparent
+    val scheme = MaterialTheme.colorScheme
+    val circle = Modifier.size(DateCircle).then(
+        when {
+            selected -> Modifier.background(scheme.primaryContainer, CircleShape)
+            today -> Modifier.border(TodayOutline, scheme.primary, CircleShape)
+            else -> Modifier
+        },
+    )
+    val numberColor = when {
+        selected -> scheme.onPrimaryContainer
+        today -> scheme.primary
+        else -> scheme.onSurface
     }
     Column(
         modifier = modifier
-            .aspectRatio(1f)
-            .padding(2.dp)
-            .clip(MaterialTheme.shapes.small)
-            .background(bg)
-            .clickable(onClick = onSelect)
-            .padding(2.dp),
+            .height(DayCellHeight)
+            .clickable(onClick = onSelect),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = date.dayOfMonth.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = if (today) FontWeight.Bold else FontWeight.Normal,
-        )
-        Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-            if (marks?.hasCompleted == true) {
-                MarkerCircle(filled = true, color = MaterialTheme.colorScheme.primary)
-            }
-            if (marks?.hasMissed == true) {
-                MarkerDiamond(color = MaterialTheme.colorScheme.secondary)
-            }
-            if (marks?.hasUpcoming == true) {
-                MarkerCircle(filled = false, color = MaterialTheme.colorScheme.primary)
-            }
+        Box(modifier = circle, contentAlignment = Alignment.Center) {
+            Text(
+                text = date.dayOfMonth.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (today) FontWeight.Bold else FontWeight.Normal,
+                color = numberColor,
+            )
+        }
+        // Markers sit 2 dp below the circle, 2 dp apart, centered.
+        Row(
+            modifier = Modifier.padding(top = MarkerGap),
+            horizontalArrangement = Arrangement.spacedBy(MarkerGap),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (marks?.hasCompleted == true) DoneGlyph(CellGlyph)
+            if (marks?.hasMissed == true) MissedGlyph(CellGlyph)
+            if (marks?.hasUpcoming == true) UpcomingGlyph(CellGlyph)
         }
     }
 }
 
+private val DateCircle = 40.dp
+private val TodayOutline = 1.dp
+private val MarkerGap = 2.dp
+private val CellGlyph = 8.dp
+private val LegendGlyph = 12.dp
+
+/** 40 dp circle + 2 dp gap + glyph row + 2 dp so the next week does not collide with markers. */
+private val DayCellHeight = DateCircle + MarkerGap + CellGlyph + MarkerGap
+
+/** Same vectors in the cells, the legend and the detail rows (item 9). */
 @Composable
-private fun MarkerCircle(filled: Boolean, color: Color) {
-    Box(
-        Modifier
-            .size(8.dp)
-            .drawBehind {
-                if (filled) {
-                    drawCircle(color)
-                } else {
-                    drawCircle(color, style = Stroke(width = size.minDimension * 0.22f))
-                }
-            },
-    )
+internal fun DoneGlyph(size: Dp) {
+    val color = MaterialTheme.colorScheme.primary
+    Box(Modifier.size(size).drawBehind { drawCircle(color) })
 }
 
 @Composable
-private fun MarkerDiamond(color: Color) {
+internal fun MissedGlyph(size: Dp) {
+    val color = MaterialTheme.colorScheme.error
     Box(
         Modifier
-            .size(8.dp)
+            .size(size)
             .drawBehind {
                 val path = Path().apply {
-                    moveTo(size.width / 2f, 0f)
-                    lineTo(size.width, size.height / 2f)
-                    lineTo(size.width / 2f, size.height)
-                    lineTo(0f, size.height / 2f)
+                    moveTo(this@drawBehind.size.width / 2f, 0f)
+                    lineTo(this@drawBehind.size.width, this@drawBehind.size.height / 2f)
+                    lineTo(this@drawBehind.size.width / 2f, this@drawBehind.size.height)
+                    lineTo(0f, this@drawBehind.size.height / 2f)
                     close()
                 }
                 drawPath(path, color, style = Fill)
@@ -234,41 +260,118 @@ private fun MarkerDiamond(color: Color) {
 }
 
 @Composable
-private fun SelectedDayList(entries: List<CalendarEntry>) {
-    if (entries.isEmpty()) {
+internal fun UpcomingGlyph(size: Dp) {
+    val color = MaterialTheme.colorScheme.primary
+    Box(
+        Modifier
+            .size(size)
+            .drawBehind {
+                val stroke = 1.5.dp.toPx()
+                drawCircle(color, radius = this.size.minDimension / 2 - stroke / 2, style = Stroke(stroke))
+            },
+    )
+}
+
+/** Item 9: one centered row under the grid; 12 dp glyphs, 4 dp gap, 16 dp between items. */
+@Composable
+private fun CalendarLegend() {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        LegendItem(R.string.calendar_done) { DoneGlyph(LegendGlyph) }
+        LegendItem(R.string.calendar_missed) { MissedGlyph(LegendGlyph) }
+        LegendItem(R.string.calendar_upcoming) { UpcomingGlyph(LegendGlyph) }
+    }
+}
+
+@Composable
+private fun LegendItem(label: Int, glyph: @Composable () -> Unit) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        glyph()
         Text(
-            stringResource(R.string.calendar_empty_day),
-            style = MaterialTheme.typography.bodyMedium,
+            stringResource(label),
+            style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
-        return
     }
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+}
+
+/** Item 10: inline, read-only detail for the selected day. */
+@Composable
+private fun DayDetail(
+    date: LocalDate,
+    entries: List<CalendarEntry>,
+    today: LocalDate,
+    now: Instant,
+    zone: ZoneId,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            CalendarFormat.dayHeader(date, today),
+            style = MaterialTheme.typography.titleSmall,
+        )
+        if (entries.isEmpty()) {
+            Text(
+                stringResource(R.string.calendar_nothing_logged),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                modifier = Modifier.padding(vertical = 8.dp),
+            )
+            return
+        }
         entries.forEach { entry ->
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                ),
-            ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                    when (entry) {
-                        is CalendarEntry.Completed -> {
-                            Text(stringResource(R.string.calendar_completed), style = MaterialTheme.typography.titleMedium)
-                            Text(Formatters.dateTime(entry.at))
-                            entry.log.site?.let { Text(siteLabel(it)) }
-                        }
-                        is CalendarEntry.Missed -> {
-                            Text(stringResource(R.string.calendar_missed), style = MaterialTheme.typography.titleMedium)
-                            Text(Formatters.dateTime(entry.at))
-                        }
-                        is CalendarEntry.Upcoming -> {
-                            Text(stringResource(R.string.calendar_upcoming), style = MaterialTheme.typography.titleMedium)
-                            Text(Formatters.dateTime(entry.at))
-                        }
-                    }
-                }
+            val time = Formatters.time(entry.at, zone)
+            when (entry) {
+                is CalendarEntry.Completed -> DetailRow(
+                    glyph = { DoneGlyph(LegendGlyph) },
+                    headline = entry.log.site?.let { ZoneReadout.label(it) } ?: stringResource(R.string.calendar_done),
+                    supporting = stringResource(R.string.calendar_row_done, time),
+                )
+                is CalendarEntry.Missed -> DetailRow(
+                    glyph = { MissedGlyph(LegendGlyph) },
+                    headline = stringResource(R.string.calendar_missed),
+                    supporting = stringResource(R.string.calendar_row_missed, time),
+                )
+                is CalendarEntry.Upcoming -> DetailRow(
+                    glyph = { UpcomingGlyph(LegendGlyph) },
+                    headline = stringResource(R.string.calendar_row_next_shot),
+                    supporting = stringResource(
+                        R.string.calendar_row_upcoming,
+                        time,
+                        nextShotRelativeText(NextShotRelative.of(entry.at, now, zone)),
+                    ),
+                )
             }
         }
     }
+}
+
+@Composable
+private fun DetailRow(glyph: @Composable () -> Unit, headline: String, supporting: String) {
+    ListItem(
+        leadingContent = glyph,
+        headlineContent = { Text(headline, style = MaterialTheme.typography.bodyLarge) },
+        supportingContent = {
+            Text(
+                supporting,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        },
+    )
+}
+
+/** Header `EEEE, MMM d` (adds `, yyyy` outside the current year, per the spec's date rule). */
+object CalendarFormat {
+    private val header: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMM d")
+    private val headerWithYear: DateTimeFormatter = DateTimeFormatter.ofPattern("EEEE, MMM d, yyyy")
+
+    fun dayHeader(date: LocalDate, today: LocalDate): String =
+        (if (date.year == today.year) header else headerWithYear).format(date)
 }
