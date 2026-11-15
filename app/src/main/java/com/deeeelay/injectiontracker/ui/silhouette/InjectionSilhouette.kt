@@ -1,26 +1,42 @@
 package com.deeeelay.injectiontracker.ui.silhouette
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.drawscope.translate
+import androidx.compose.ui.graphics.vector.VectorPainter
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.domain.InjectionSite
+import com.deeeelay.injectiontracker.domain.ZoneReadout
 
 enum class SilhouetteMode { Display, Select }
 
@@ -28,7 +44,18 @@ private const val VIEWPORT_W = InjectionSite.VIEWPORT_WIDTH
 private const val VIEWPORT_H = InjectionSite.VIEWPORT_HEIGHT
 private val MinHitTarget = InjectionSite.HIT_TARGET_DP.dp
 
-/** Locked VectorDrawable resource for Home display / Log Done select. Period dots are in the VDs. Visual NO-OP in v1.1 — filenames follow anatomical L↔R ids. */
+/** Marker-free base art: markers are drawn in code from zones.json cx/cy. */
+@DrawableRes
+fun silhouetteBaseDrawableRes(mode: SilhouetteMode): Int = when (mode) {
+    SilhouetteMode.Display -> R.drawable.silhouette_display_empty
+    SilhouetteMode.Select -> R.drawable.silhouette_select_unselected
+}
+
+/**
+ * Legacy per-zone VectorDrawable mapping (dots baked in). Not used for rendering since the
+ * 2026-11-14 Design Critique review (item A): markers are drawn in code over the base drawables
+ * from [silhouetteBaseDrawableRes]. Kept until Visual/Design retire the per-zone files.
+ */
 @DrawableRes
 fun silhouetteDrawableRes(mode: SilhouetteMode, site: InjectionSite?): Int {
     return when (mode) {
@@ -86,72 +113,180 @@ fun silhouetteDrawableName(mode: SilhouetteMode, site: InjectionSite?): String {
     }
 }
 
+/**
+ * Silhouette with code-drawn zone markers.
+ *
+ * - [SilhouetteMode.Display] (Home): [markedSite] is the last site, drawn as the 17 dp Home marker.
+ * - [SilhouetteMode.Select] (Log): all 18 zones show a 14 dp hollow ring; [lastSite] gets a
+ *   center dot; [markedSite] is the selection (20 dp disc + check). Taps within [hitPadding] of
+ *   the figure snap to the nearest zone; taps > 28 dp from every center are ignored.
+ */
 @Composable
 fun InjectionSilhouette(
     modifier: Modifier = Modifier,
     mode: SilhouetteMode,
     markedSite: InjectionSite? = null,
+    lastSite: InjectionSite? = null,
+    hitPadding: Dp = 0.dp,
+    window: ZoneGeometry.ViewWindow = ZoneGeometry.FULL_FRAME,
     onSiteSelected: ((InjectionSite) -> Unit)? = null,
 ) {
     val density = LocalDensity.current
-    val drawableRes = silhouetteDrawableRes(mode, markedSite)
     val imageDescription = when {
         markedSite != null -> siteLabel(markedSite)
         mode == SilhouetteMode.Display -> stringResource(R.string.home_last_site)
         else -> stringResource(R.string.log_done_tap_site)
     }
+    val colors = MaterialTheme.colorScheme
+    val check = rememberVectorPainter(Icons.Filled.Check)
 
     BoxWithConstraints(modifier = modifier) {
+        val padPx = with(density) { hitPadding.toPx() }
         val scale = minOf(
-            constraints.maxWidth / VIEWPORT_W,
-            constraints.maxHeight / VIEWPORT_H,
+            (constraints.maxWidth - 2 * padPx) / window.width,
+            (constraints.maxHeight - 2 * padPx) / window.height,
         ).coerceAtLeast(1f)
-        val widthPx = VIEWPORT_W * scale
-        val heightPx = VIEWPORT_H * scale
+        val widthPx = window.width * scale
+        val heightPx = window.height * scale
         val widthDp = with(density) { widthPx.toDp() }
         val heightDp = with(density) { heightPx.toDp() }
-        val maxDistanceViewport = InjectionSite.HIT_TARGET_DP * VIEWPORT_W / widthDp.value
+        val selectable = mode == SilhouetteMode.Select && onSiteSelected != null
 
-        Box(Modifier.size(widthDp, heightDp)) {
-            Image(
-                painter = painterResource(drawableRes),
-                contentDescription = imageDescription,
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.FillBounds,
-            )
-            if (mode == SilhouetteMode.Select && onSiteSelected != null) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .pointerInput(widthPx, heightPx, maxDistanceViewport) {
-                            detectTapGestures { offset ->
-                                val vx = offset.x / widthPx * VIEWPORT_W
-                                val vy = offset.y / heightPx * VIEWPORT_H
-                                InjectionSite.nearest(vx, vy, maxDistanceViewport)
-                                    ?.let(onSiteSelected)
+        Box(
+            modifier = Modifier
+                .size(widthDp + hitPadding * 2, heightDp + hitPadding * 2)
+                .then(
+                    if (selectable) {
+                        Modifier.pointerInput(widthPx, heightPx, padPx) {
+                            detectTapGestures { tap ->
+                                ZoneGeometry.snapToZone(
+                                    tapX = tap.x - padPx,
+                                    tapY = tap.y - padPx,
+                                    figureWidthPx = widthPx,
+                                    figureHeightPx = heightPx,
+                                    pxPerDp = density.density,
+                                    window = window,
+                                )?.let { onSiteSelected?.invoke(it) }
                             }
-                        },
-                )
-                InjectionSite.entries.forEach { site ->
-                    val cx = widthDp * (site.viewportX / VIEWPORT_W)
-                    val cy = heightDp * (site.viewportY / VIEWPORT_H)
-                    val label = siteLabel(site)
-                    Box(
-                        modifier = Modifier
-                            .offset(x = cx - MinHitTarget / 2, y = cy - MinHitTarget / 2)
-                            .size(MinHitTarget)
-                            .semantics {
-                                contentDescription = label
-                                onClick {
-                                    onSiteSelected(site)
-                                    true
-                                }
-                            },
-                    )
+                        }
+                    } else {
+                        Modifier
+                    },
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            val art = painterResource(silhouetteBaseDrawableRes(mode))
+            Box(
+                Modifier
+                    .size(widthDp, heightDp)
+                    .semantics { contentDescription = imageDescription },
+            ) {
+                Canvas(Modifier.fillMaxSize()) {
+                    // Draw the whole 140×220 art, shifted so only [window] lands in this box.
+                    val unit = size.width / window.width
+                    clipRect {
+                        translate(-window.x * unit, -window.y * unit) {
+                            with(art) { draw(Size(VIEWPORT_W * unit, VIEWPORT_H * unit)) }
+                        }
+                    }
+                }
+                Canvas(Modifier.fillMaxSize()) {
+                    if (mode == SilhouetteMode.Display) {
+                        markedSite?.let { site ->
+                            val c = ZoneGeometry.markerCenter(site, size.width, size.height, window)
+                            drawHomeMarker(Offset(c.x, c.y), colors.primary, colors.surface)
+                        }
+                    } else {
+                        drawSelectMarkers(
+                            window = window,
+                            selected = markedSite,
+                            lastSite = lastSite,
+                            colors = MarkerColors(
+                                rest = colors.onSurfaceVariant,
+                                lastRing = colors.outline,
+                                lastDot = colors.onSurfaceVariant,
+                                selected = colors.primary,
+                                halo = colors.surface,
+                                check = colors.onPrimary,
+                            ),
+                            check = check,
+                        )
+                    }
+                }
+                if (selectable) {
+                    InjectionSite.entries.forEach { site ->
+                        val c = ZoneGeometry.markerCenter(site, widthDp.value, heightDp.value, window)
+                        val label = ZoneReadout.label(site)
+                        val isSelected = site == markedSite
+                        Box(
+                            modifier = Modifier
+                                .offset(x = c.x.dp - MinHitTarget / 2, y = c.y.dp - MinHitTarget / 2)
+                                .size(MinHitTarget)
+                                .semantics {
+                                    contentDescription = label
+                                    selected = isSelected
+                                    onClick {
+                                        onSiteSelected?.invoke(site)
+                                        true
+                                    }
+                                },
+                        )
+                    }
                 }
             }
         }
     }
+}
+
+private class MarkerColors(
+    val rest: Color,
+    val lastRing: Color,
+    val lastDot: Color,
+    val selected: Color,
+    val halo: Color,
+    val check: Color,
+)
+
+private fun DrawScope.drawSelectMarkers(
+    window: ZoneGeometry.ViewWindow,
+    selected: InjectionSite?,
+    lastSite: InjectionSite?,
+    colors: MarkerColors,
+    check: VectorPainter,
+) {
+    val ringStroke = ZoneGeometry.RING_STROKE_DP.dp.toPx()
+    val ringRadius = ZoneGeometry.REST_RING_DP.dp.toPx() / 2 - ringStroke / 2
+    // Rings and last-site first; the selected glyph draws above its neighbors.
+    InjectionSite.entries.forEach { site ->
+        val c = ZoneGeometry.markerCenter(site, size.width, size.height, window).let { Offset(it.x, it.y) }
+        when (zoneGlyph(site, selected, lastSite)) {
+            ZoneGlyph.Rest -> drawCircle(colors.rest, ringRadius, c, style = Stroke(ringStroke))
+            ZoneGlyph.LastSite -> {
+                drawCircle(colors.lastRing, ringRadius, c, style = Stroke(ringStroke))
+                drawCircle(colors.lastDot, ZoneGeometry.LAST_SITE_DOT_DP.dp.toPx() / 2, c)
+            }
+            ZoneGlyph.Selected -> Unit
+        }
+    }
+    selected?.let { site ->
+        val c = ZoneGeometry.markerCenter(site, size.width, size.height, window).let { Offset(it.x, it.y) }
+        val discRadius = ZoneGeometry.SELECTED_DISC_DP.dp.toPx() / 2
+        drawCircle(colors.halo, discRadius + ZoneGeometry.SELECTED_HALO_DP.dp.toPx(), c)
+        drawCircle(colors.selected, discRadius, c)
+        val checkPx = ZoneGeometry.SELECTED_CHECK_DP.dp.toPx()
+        translate(c.x - checkPx / 2, c.y - checkPx / 2) {
+            with(check) { draw(Size(checkPx, checkPx), colorFilter = ColorFilter.tint(colors.check)) }
+        }
+    }
+}
+
+private fun DrawScope.drawHomeMarker(c: Offset, primary: Color, surface: Color) {
+    val dotR = ZoneGeometry.HOME_DOT_DP.dp.toPx() / 2
+    val haloR = dotR + ZoneGeometry.HOME_HALO_DP.dp.toPx()
+    val ringStroke = ZoneGeometry.HOME_RING_STROKE_DP.dp.toPx()
+    drawCircle(surface, haloR, c)
+    drawCircle(primary, haloR + ringStroke / 2, c, style = Stroke(ringStroke))
+    drawCircle(primary, dotR, c)
 }
 
 @Composable

@@ -39,7 +39,8 @@
 
     <string name="log_done_title">Log injection</string>
     <string name="log_done_tap_site">Tap where you injected</string>
-    <string name="log_done_need_site">Select one injection site to save.</string>
+    <string name="log_readout_empty">Tap a spot on the figure</string>
+    <string name="log_readout_last_time">Last time: %1$s · %2$s</string>
 
     <string name="missed_title">Mark this injection as missed?</string>
     <string name="missed_body">Your next dose will be scheduled from now, not the original due time. No site is recorded.</string>
