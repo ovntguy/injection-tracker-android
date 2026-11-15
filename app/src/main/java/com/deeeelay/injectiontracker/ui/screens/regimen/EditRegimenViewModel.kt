@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
@@ -26,6 +27,7 @@ data class EditRegimenState(
     val dosageError: Boolean = false,
     val saving: Boolean = false,
     val saved: Boolean = false,
+    val savedWithChanges: Boolean = false,
 )
 
 class EditRegimenViewModel(
@@ -34,11 +36,20 @@ class EditRegimenViewModel(
     private val _state = MutableStateFlow(EditRegimenState())
     val state: StateFlow<EditRegimenState> = _state.asStateFlow()
 
+    private var originalName = ""
+    private var originalDosage = ""
+    private var originalFrequency = Frequency.EVERY_WEEK
+    private var originalStart: Instant? = null
+
     init {
         viewModelScope.launch {
             val snap = repository.snapshot.first { it.regimen != null }
             val regimen = snap.regimen ?: return@launch
             val zoned = regimen.startDateTime.atZone(ZoneId.systemDefault())
+            originalName = regimen.medicineName
+            originalDosage = regimen.dosage
+            originalFrequency = regimen.frequency
+            originalStart = regimen.startDateTime
             _state.update {
                 it.copy(
                     loaded = true,
@@ -66,15 +77,32 @@ class EditRegimenViewModel(
             _state.update { it.copy(nameError = nameBlank, dosageError = dosageBlank) }
             return
         }
+        val start = combineLocalDateTime(current.date, current.time)
+        val original = originalStart
+        val changed = original != null &&
+            RegimenUpdatedSnackbar.formChanged(
+                originalName = originalName,
+                originalDosage = originalDosage,
+                originalFrequency = originalFrequency,
+                originalStart = original,
+                name = current.medicineName,
+                dosage = current.dosage,
+                frequency = current.frequency,
+                start = start,
+            )
+        if (!changed) {
+            _state.update { it.copy(saving = false, saved = true, savedWithChanges = false) }
+            return
+        }
         viewModelScope.launch {
             _state.update { it.copy(saving = true) }
             repository.updateRegimen(
                 medicineName = current.medicineName,
                 dosage = current.dosage,
                 frequency = current.frequency,
-                startDateTime = combineLocalDateTime(current.date, current.time),
+                startDateTime = start,
             )
-            _state.update { it.copy(saving = false, saved = true) }
+            _state.update { it.copy(saving = false, saved = true, savedWithChanges = true) }
         }
     }
 }

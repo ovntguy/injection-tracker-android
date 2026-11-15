@@ -66,6 +66,7 @@
     <string name="settings_regimen_headline">%1$s %2$s</string>
 
     <string name="edit_regimen_title">Edit regimen</string>
+    <string name="snackbar_regimen_updated">Regimen updated</string>
 
     <string name="notif_channel_name">Injection reminders</string>
     <string name="notif_channel_desc">Day-before and at-time injection reminders</string>

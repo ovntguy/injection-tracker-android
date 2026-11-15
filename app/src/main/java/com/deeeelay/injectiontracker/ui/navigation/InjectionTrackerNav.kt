@@ -15,6 +15,11 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,6 +35,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.flow.StateFlow
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.data.repo.TrackerRepository
 import com.deeeelay.injectiontracker.ui.screens.calendar.CalendarScreen
@@ -40,6 +46,7 @@ import com.deeeelay.injectiontracker.ui.screens.logdone.LogDoneScreen
 import com.deeeelay.injectiontracker.ui.screens.logdone.LogDoneViewModel
 import com.deeeelay.injectiontracker.ui.screens.regimen.EditRegimenScreen
 import com.deeeelay.injectiontracker.ui.screens.regimen.EditRegimenViewModel
+import com.deeeelay.injectiontracker.ui.screens.regimen.RegimenUpdatedSnackbar
 import com.deeeelay.injectiontracker.ui.screens.settings.SettingsScreen
 import com.deeeelay.injectiontracker.ui.screens.settings.SettingsViewModel
 import com.deeeelay.injectiontracker.ui.screens.setup.SetupScreen
@@ -75,12 +82,17 @@ fun InjectionTrackerNav(
 
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = Routes.Main) {
-        composable(Routes.Main) {
+        composable(Routes.Main) { entry ->
             MainTabs(
                 factory = factory,
                 remindersWanted = snapshot!!.dayBeforeEnabled || snapshot!!.atTimeEnabled,
                 onLogInjection = { navController.navigate(Routes.LogDone) },
                 onEditRegimen = { navController.navigate(Routes.EditRegimen) },
+                regimenUpdated = entry.savedStateHandle
+                    .getStateFlow(RegimenUpdatedSnackbar.NAV_RESULT_KEY, false),
+                onRegimenUpdatedShown = {
+                    entry.savedStateHandle[RegimenUpdatedSnackbar.NAV_RESULT_KEY] = false
+                },
             )
         }
         composable(Routes.LogDone) {
@@ -89,7 +101,17 @@ fun InjectionTrackerNav(
         }
         composable(Routes.EditRegimen) {
             val vm: EditRegimenViewModel = viewModel(factory = factory)
-            EditRegimenScreen(viewModel = vm, onBack = { navController.popBackStack() })
+            EditRegimenScreen(
+                viewModel = vm,
+                onFinished = { savedWithChanges ->
+                    if (savedWithChanges) {
+                        navController.previousBackStackEntry
+                            ?.savedStateHandle
+                            ?.set(RegimenUpdatedSnackbar.NAV_RESULT_KEY, true)
+                    }
+                    navController.popBackStack()
+                },
+            )
         }
     }
 }
@@ -100,12 +122,26 @@ private fun MainTabs(
     remindersWanted: Boolean,
     onLogInjection: () -> Unit,
     onEditRegimen: () -> Unit,
+    regimenUpdated: StateFlow<Boolean>,
+    onRegimenUpdatedShown: () -> Unit,
 ) {
     var tab by rememberSaveable { mutableStateOf(MainTab.Home) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val showUpdated by regimenUpdated.collectAsStateWithLifecycle()
+    val updatedMessage = stringResource(R.string.snackbar_regimen_updated)
+    LaunchedEffect(showUpdated) {
+        if (showUpdated) {
+            onRegimenUpdatedShown()
+            snackbarHostState.currentSnackbarData?.dismiss()
+            snackbarHostState.showSnackbar(
+                message = updatedMessage,
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
     Scaffold(
-        bottomBar = {
-            MainNavigationBar(selected = tab, onSelect = { tab = it })
-        },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        bottomBar = { MainNavigationBar(selected = tab, onSelect = { tab = it }) },
     ) { padding ->
         Box(Modifier.padding(padding).fillMaxSize()) {
             when (tab) {
