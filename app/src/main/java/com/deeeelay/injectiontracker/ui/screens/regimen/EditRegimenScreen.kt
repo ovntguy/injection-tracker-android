@@ -36,11 +36,11 @@ import com.deeeelay.injectiontracker.ui.components.FrequencyDropdown
 @Composable
 fun EditRegimenScreen(
     viewModel: EditRegimenViewModel,
-    onBack: () -> Unit,
+    onFinished: (savedWithChanges: Boolean) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(state.saved) {
-        if (state.saved) onBack()
+        if (state.saved) onFinished(state.savedWithChanges)
     }
 
     Scaffold(
@@ -48,7 +48,7 @@ fun EditRegimenScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.edit_regimen_title)) },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { onFinished(false) }) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.action_back),

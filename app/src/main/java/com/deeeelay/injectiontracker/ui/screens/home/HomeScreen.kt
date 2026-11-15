@@ -11,7 +11,6 @@ import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -34,15 +33,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,7 +63,6 @@ import com.deeeelay.injectiontracker.ui.components.frequencyLabel
 import com.deeeelay.injectiontracker.ui.silhouette.InjectionSilhouette
 import com.deeeelay.injectiontracker.ui.silhouette.SilhouetteMode
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.ZoneId
 
@@ -78,12 +73,10 @@ fun HomeScreen(
     remindersWanted: Boolean,
     onLogInjection: () -> Unit,
     onEditRegimen: () -> Unit,
+    onMissedLogged: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var showMissed by remember { mutableStateOf(false) }
-    val snackbar = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
-    val missedMessage = stringResource(R.string.home_marked_missed)
     // Item 16: the relative "Next shot" line refreshes on resume and every minute while visible.
     val now = rememberHomeNow()
     val context = LocalContext.current
@@ -113,8 +106,7 @@ fun HomeScreen(
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
-    Box(Modifier.fillMaxSize()) {
-        HomeContent(
+    HomeContent(
             state = state,
             now = now,
             remindersWanted = remindersWanted,
@@ -145,9 +137,7 @@ fun HomeScreen(
                     )
                 }
             },
-        )
-        SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
-    }
+    )
 
     if (showMissed) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -159,7 +149,7 @@ fun HomeScreen(
                 onConfirm = {
                     viewModel.logMissed()
                     showMissed = false
-                    scope.launch { snackbar.showSnackbar(missedMessage) }
+                    onMissedLogged()
                 },
                 onCancel = { showMissed = false },
             )
