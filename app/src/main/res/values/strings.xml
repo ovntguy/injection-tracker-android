@@ -58,10 +58,12 @@
     <string name="settings_title">Settings</string>
     <string name="settings_reminders">Reminders</string>
     <string name="settings_day_before">Day before</string>
-    <string name="settings_day_before_support">Same clock as the injection, 24 hours earlier</string>
-    <string name="settings_at_time">At time</string>
-    <string name="settings_at_time_support">When the next injection is due</string>
+    <string name="settings_day_before_support">24 hours before your shot</string>
+    <string name="settings_when_due">When it\'s due</string>
+    <string name="settings_notifications_off">Notifications are off for this app</string>
+    <string name="settings_turn_on">Turn on</string>
     <string name="settings_regimen">Regimen</string>
+    <string name="settings_regimen_headline">%1$s %2$s</string>
 
     <string name="edit_regimen_title">Edit regimen</string>
 
