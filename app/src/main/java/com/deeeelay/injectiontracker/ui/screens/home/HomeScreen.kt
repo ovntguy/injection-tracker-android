@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.layout.SubcomposeLayout
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -202,66 +207,123 @@ fun HomeContent(
     now: Instant = Instant.now(),
     zone: ZoneId = ZoneId.systemDefault(),
 ) {
-    Column(
+    HomeFitColumn(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
-        Text(state.medicineName, style = MaterialTheme.typography.headlineMedium)
-        Text(
-            text = stringResource(
-                R.string.home_dose_frequency,
-                state.dosage,
-                frequencyLabel(state.frequency),
-            ),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        // Item 16: no regimen yet means no card (setup flow owns that state).
-        state.nextInjectionAt?.let { due ->
-            NextShotCard(due = due, now = now, zone = zone)
-        }
-
-        Text(
-            stringResource(R.string.home_last_site),
-            style = MaterialTheme.typography.titleSmall,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        LastSiteRow(state = state, now = now, zone = zone)
-
-        Button(onClick = onLogInjection, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.action_log_injection))
-        }
-        OutlinedButton(onClick = onMarkMissed, modifier = Modifier.fillMaxWidth()) {
-            Text(stringResource(R.string.action_mark_as_missed))
-        }
-        TextButton(onClick = onEditRegimen, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            Text(stringResource(R.string.action_edit_regimen))
-        }
-
-        if (remindersWanted && !notificationsAllowed) {
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
+        top = {
+            Text(state.medicineName, style = MaterialTheme.typography.headlineMedium)
+            Text(
+                text = stringResource(
+                    R.string.home_dose_frequency,
+                    state.dosage,
+                    frequencyLabel(state.frequency),
                 ),
-            ) {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(
-                        stringResource(R.string.home_notif_denied),
-                        color = MaterialTheme.colorScheme.onErrorContainer,
-                    )
-                    TextButton(
-                        onClick = onEnableNotifications,
-                    ) { Text(stringResource(R.string.action_enable)) }
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            // Item 16: no regimen yet means no card (setup flow owns that state).
+            state.nextInjectionAt?.let { due ->
+                NextShotCard(due = due, now = now, zone = zone)
+            }
+            Text(
+                stringResource(R.string.home_last_site),
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        },
+        figure = { figureHeight ->
+            LastSiteRow(state = state, now = now, zone = zone, figureHeight = figureHeight)
+        },
+        bottom = {
+            Button(onClick = onLogInjection, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.action_log_injection))
+            }
+            OutlinedButton(onClick = onMarkMissed, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.action_mark_as_missed))
+            }
+            TextButton(onClick = onEditRegimen, modifier = Modifier.fillMaxWidth()) {
+                Text(stringResource(R.string.action_edit_regimen))
+            }
+            if (remindersWanted && !notificationsAllowed) {
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                    ),
+                ) {
+                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            stringResource(R.string.home_notif_denied),
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        TextButton(
+                            onClick = onEnableNotifications,
+                        ) { Text(stringResource(R.string.action_enable)) }
+                    }
                 }
             }
-        }
-        Spacer(Modifier.height(8.dp))
-    }
+            Spacer(Modifier.height(8.dp))
+        },
+    )
+}
 
+/**
+ * Lays out Home so the last-site figure takes leftover height, clamped to 88–336 dp.
+ * Scrolls only when leftover space is under 88 dp (Design polish spec, rev 2026-11-15).
+ */
+@Composable
+private fun HomeFitColumn(
+    modifier: Modifier = Modifier,
+    gap: Dp = 16.dp,
+    top: @Composable ColumnScope.() -> Unit,
+    figure: @Composable (Dp) -> Unit,
+    bottom: @Composable ColumnScope.() -> Unit,
+) {
+    val density = LocalDensity.current
+    SubcomposeLayout(modifier) { constraints ->
+        val maxW = constraints.maxWidth
+        val maxH = constraints.maxHeight
+        val loose = Constraints(minWidth = 0, maxWidth = maxW, minHeight = 0, maxHeight = Constraints.Infinity)
+        val topP = subcompose("top") {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(gap), content = top)
+        }.map { it.measure(loose) }
+        val bottomP = subcompose("bottom") {
+            Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(gap), content = bottom)
+        }.map { it.measure(loose) }
+        val gapPx = with(density) { gap.roundToPx() }
+        val leftoverDp = (maxH - topP.sumOf { it.height } - bottomP.sumOf { it.height } - 2 * gapPx) / density.density
+        val figureDp = HomeFigureLayout.figureHeight(leftoverDp)
+        val scrolls = HomeFigureLayout.scrolls(leftoverDp)
+        val figurePx = with(density) { figureDp.dp.roundToPx() }
+
+        if (!scrolls) {
+            val figP = subcompose("figure") { figure(figureDp.dp) }.map {
+                it.measure(Constraints(minWidth = maxW, maxWidth = maxW, minHeight = figurePx, maxHeight = figurePx))
+            }
+            layout(maxW, maxH) {
+                var y = 0
+                topP.forEach { it.placeRelative(0, y); y += it.height }
+                y += gapPx
+                figP.forEach { it.placeRelative(0, y); y += it.height }
+                y += gapPx
+                bottomP.forEach { it.placeRelative(0, y) }
+            }
+        } else {
+            val scrollP = subcompose("scroll") {
+                Column(
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(gap),
+                ) {
+                    top()
+                    figure(HomeFigureLayout.MIN_DP.dp)
+                    bottom()
+                }
+            }.map { it.measure(Constraints(minWidth = maxW, maxWidth = maxW, minHeight = 0, maxHeight = maxH)) }
+            layout(maxW, maxH) { scrollP.forEach { it.placeRelative(0, 0) } }
+        }
+    }
 }
 
 @Composable
@@ -301,7 +363,7 @@ internal fun NextShotCard(due: Instant, now: Instant, zone: ZoneId) {
  * start-aligned). Missed logs never change the label, date or marker.
  */
 @Composable
-private fun LastSiteRow(state: HomeUiState, now: Instant, zone: ZoneId) {
+private fun LastSiteRow(state: HomeUiState, now: Instant, zone: ZoneId, figureHeight: Dp) {
     val site = state.lastSite
     val at = state.lastSiteAt
     val label = site?.let { ZoneReadout.label(it) }
@@ -315,13 +377,16 @@ private fun LastSiteRow(state: HomeUiState, now: Instant, zone: ZoneId) {
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val compact = HomeFigureLayout.compact(figureHeight.value)
         InjectionSilhouette(
             modifier = Modifier
                 .weight(1f)
-                .height(LastSiteFigureHeight),
+                .height(figureHeight),
             mode = SilhouetteMode.Display,
             markedSite = site,
             description = description,
+            homeMarkerDiameterDp = HomeFigureLayout.markerDiameterDp(figureHeight.value),
+            hideSideLabels = compact,
         )
         Spacer(Modifier.width(16.dp))
         Column(
@@ -352,7 +417,6 @@ private fun LastSiteRow(state: HomeUiState, now: Instant, zone: ZoneId) {
     }
 }
 
-private val LastSiteFigureHeight = 280.dp
 
 private fun areNotificationsEnabled(context: Context): Boolean {
     val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

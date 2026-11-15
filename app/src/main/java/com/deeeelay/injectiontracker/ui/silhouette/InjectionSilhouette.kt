@@ -153,6 +153,10 @@ fun InjectionSilhouette(
     hitPadding: Dp = 0.dp,
     window: ZoneGeometry.ViewWindow = ZoneGeometry.FULL_FRAME,
     description: String? = null,
+    /** Overall last-site marker diameter on Home; defaults to the 17 dp (spec "16 dp") glyph. */
+    homeMarkerDiameterDp: Float = ZoneGeometry.HOME_MARKER_DP,
+    /** When true, R/L are omitted even if the figure is wide enough (Home compact height). */
+    hideSideLabels: Boolean = false,
     onSiteSelected: ((InjectionSite) -> Unit)? = null,
 ) {
     val density = LocalDensity.current
@@ -217,7 +221,7 @@ fun InjectionSilhouette(
                     if (mode == SilhouetteMode.Display) {
                         markedSite?.let { site ->
                             val c = ZoneGeometry.markerCenter(site, size.width, size.height, window)
-                            drawHomeMarker(Offset(c.x, c.y), colors.primary, colors.surface)
+                            drawHomeMarker(Offset(c.x, c.y), colors.primary, colors.surface, homeMarkerDiameterDp)
                         }
                     } else {
                         drawSelectMarkers(
@@ -236,7 +240,7 @@ fun InjectionSilhouette(
                         )
                     }
                 }
-                if (SideLabels.fits(widthDp.value)) {
+                if (!hideSideLabels && SideLabels.fits(widthDp.value)) {
                     SideLabel(stringResource(R.string.silhouette_side_right), SideLabels.RIGHT_X, window, widthDp, heightDp)
                     SideLabel(stringResource(R.string.silhouette_side_left), SideLabels.LEFT_X, window, widthDp, heightDp)
                 }
@@ -337,10 +341,16 @@ private fun DrawScope.drawSelectMarkers(
     }
 }
 
-private fun DrawScope.drawHomeMarker(c: Offset, primary: Color, surface: Color) {
-    val dotR = ZoneGeometry.HOME_DOT_DP.dp.toPx() / 2
-    val haloR = dotR + ZoneGeometry.HOME_HALO_DP.dp.toPx()
-    val ringStroke = ZoneGeometry.HOME_RING_STROKE_DP.dp.toPx()
+private fun DrawScope.drawHomeMarker(
+    c: Offset,
+    primary: Color,
+    surface: Color,
+    diameterDp: Float = ZoneGeometry.HOME_MARKER_DP,
+) {
+    val scale = diameterDp / ZoneGeometry.HOME_MARKER_DP
+    val dotR = ZoneGeometry.HOME_DOT_DP.dp.toPx() / 2 * scale
+    val haloR = dotR + ZoneGeometry.HOME_HALO_DP.dp.toPx() * scale
+    val ringStroke = ZoneGeometry.HOME_RING_STROKE_DP.dp.toPx() * scale
     drawCircle(surface, haloR, c)
     drawCircle(primary, haloR + ringStroke / 2, c, style = Stroke(ringStroke))
     drawCircle(primary, dotR, c)

@@ -1,8 +1,11 @@
 package com.deeeelay.injectiontracker.ui.screens.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -61,6 +64,28 @@ internal object P3Fixtures {
                 now = now,
                 zone = zone,
             )
+        }
+    }
+
+    /** 360×640 Home with the bottom nav, the short-screen case the height cap is written for. */
+    @Composable
+    fun HomeWithNav(state: HomeUiState) = InjectionTrackerTheme {
+        Scaffold(
+            bottomBar = { MainNavigationBar(selected = MainTab.Home, onSelect = {}) },
+        ) { padding ->
+            Box(Modifier.padding(padding).fillMaxSize()) {
+                HomeContent(
+                    state = state,
+                    remindersWanted = false,
+                    notificationsAllowed = true,
+                    onLogInjection = {},
+                    onMarkMissed = {},
+                    onEditRegimen = {},
+                    onEnableNotifications = {},
+                    now = now,
+                    zone = zone,
+                )
+            }
         }
     }
 }
@@ -164,8 +189,8 @@ class P3HomeSmallScreenSnapshotTest(private val night: Boolean) {
     private val mode get() = if (night) "dark" else "light"
 
     @Test
-    fun homeHasDoneLog() = paparazzi.snapshot("home_small_has_done_log_$mode") { P3Fixtures.Home(P3Fixtures.hasDoneLog) }
+    fun homeHasDoneLog() = paparazzi.snapshot("home_small_has_done_log_$mode") { P3Fixtures.HomeWithNav(P3Fixtures.hasDoneLog) }
 
     @Test
-    fun homeNoShotsLoggedYet() = paparazzi.snapshot("home_small_no_shots_yet_$mode") { P3Fixtures.Home(P3Fixtures.noDoneLogs) }
+    fun homeNoShotsLoggedYet() = paparazzi.snapshot("home_small_no_shots_yet_$mode") { P3Fixtures.HomeWithNav(P3Fixtures.noDoneLogs) }
 }
