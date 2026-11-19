@@ -1,5 +1,7 @@
 package com.deeeelay.injectiontracker.notifications
 
+import android.annotation.SuppressLint
+import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -10,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != Intent.ACTION_BOOT_COMPLETED) return
+        if (intent.action !in RESCHEDULE_ACTIONS) return
         val pending = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -20,5 +22,17 @@ class BootReceiver : BroadcastReceiver() {
                 pending.finish()
             }
         }
+    }
+
+    private companion object {
+        /**
+         * Boot clears alarms; an exact-alarm grant lets the pending ones be re-set as exact.
+         * The API 31 action is a compile-time string; older devices simply never send it.
+         */
+        @SuppressLint("InlinedApi")
+        val RESCHEDULE_ACTIONS = setOf(
+            Intent.ACTION_BOOT_COMPLETED,
+            AlarmManager.ACTION_SCHEDULE_EXACT_ALARM_PERMISSION_STATE_CHANGED,
+        )
     }
 }
