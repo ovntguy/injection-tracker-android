@@ -24,20 +24,26 @@ object Scheduling {
     }
 
     /**
-     * Upcoming after a frequency or anchor (start date/time) edit.
-     * Past logs are not rewritten. If any terminal log exists, upcoming is last log + interval;
-     * otherwise upcoming is the (possibly new) start date/time.
+     * Upcoming after a frequency or anchor (start date/time) edit. Past logs are not rewritten.
+     *
+     * - No terminal log yet: upcoming is the (possibly new) start date/time.
+     * - Anchor changed: upcoming is the first slot on the new anchor's cadence
+     *   (start + k × interval, k ≥ 0) after the last log, so "my shots are on Thursdays" works.
+     * - Only the frequency changed: upcoming is last log + the new interval.
      */
     fun nextAfterRegimenEdit(
         startDateTime: Instant,
         lastTerminalLogAt: Instant?,
         frequency: Frequency,
-    ): Instant =
-        if (lastTerminalLogAt != null) {
-            lastTerminalLogAt.plus(interval(frequency))
-        } else {
-            startDateTime
-        }
+        anchorChanged: Boolean = false,
+    ): Instant {
+        if (lastTerminalLogAt == null) return startDateTime
+        if (!anchorChanged) return lastTerminalLogAt.plus(interval(frequency))
+        if (startDateTime.isAfter(lastTerminalLogAt)) return startDateTime
+        val step = interval(frequency)
+        val periods = Duration.between(startDateTime, lastTerminalLogAt).toMillis() / step.toMillis() + 1
+        return startDateTime.plus(step.multipliedBy(periods))
+    }
 
     fun dayBeforeReminderAt(nextInjectionAt: Instant): Instant =
         nextInjectionAt.minus(Duration.ofHours(24))

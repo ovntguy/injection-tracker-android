@@ -86,6 +86,29 @@ class SchedulingTest {
     }
 
     @Test
+    fun anchorEditWithLogsUsesFirstSlotOnNewCadenceAfterLastLog() {
+        val lastLog = t0
+        // Cadence slots at -15, -8, -1, +6 days from the last log: first one after it is +6.
+        val newStart = t0.minus(Duration.ofDays(15))
+        val next = Scheduling.nextAfterRegimenEdit(newStart, lastLog, Frequency.EVERY_WEEK, anchorChanged = true)
+        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(6)))
+    }
+
+    @Test
+    fun anchorEditToAfterLastLogUsesNewStart() {
+        val newStart = t0.plus(Duration.ofDays(3))
+        val next = Scheduling.nextAfterRegimenEdit(newStart, t0, Frequency.EVERY_OTHER_WEEK, anchorChanged = true)
+        assertThat(next).isEqualTo(newStart)
+    }
+
+    @Test
+    fun anchorEditLandingExactlyOnLastLogMovesOneInterval() {
+        val newStart = t0.minus(Duration.ofDays(14))
+        val next = Scheduling.nextAfterRegimenEdit(newStart, t0, Frequency.EVERY_WEEK, anchorChanged = true)
+        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(7)))
+    }
+
+    @Test
     fun dayBeforeReminderIsSameClockMinus24Hours() {
         val next = LocalDateTime.of(2026, 9, 11, 8, 30).toInstant(ZoneOffset.UTC)
         val reminder = Scheduling.dayBeforeReminderAt(next)

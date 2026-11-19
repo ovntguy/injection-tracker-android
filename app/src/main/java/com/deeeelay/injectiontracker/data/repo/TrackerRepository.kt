@@ -91,10 +91,9 @@ class TrackerRepository(
         val old = current.regimen ?: return
         val lastLogAt = logDao.getAll().maxByOrNull { it.loggedAtEpochMillis }
             ?.let { Instant.ofEpochMilli(it.loggedAtEpochMillis) }
-        val frequencyOrAnchorChanged =
-            frequency != old.frequency || startDateTime != old.startDateTime
-        val next = if (frequencyOrAnchorChanged) {
-            Scheduling.nextAfterRegimenEdit(startDateTime, lastLogAt, frequency)
+        val anchorChanged = startDateTime != old.startDateTime
+        val next = if (anchorChanged || frequency != old.frequency) {
+            Scheduling.nextAfterRegimenEdit(startDateTime, lastLogAt, frequency, anchorChanged)
         } else {
             old.nextInjectionAt
         }

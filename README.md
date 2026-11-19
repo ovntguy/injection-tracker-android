@@ -32,7 +32,7 @@ Install the debug APK from `app/build/outputs/apk/debug/`.
 - **Log missed:** confirmation sheet, no site. Next due = missed due time + interval, skipping ahead by whole intervals if that is already past, so the schedule keeps its cadence.
 - **Calendar:** past actual logs plus the next upcoming mark (completed circle, missed diamond, upcoming outline).
 - **Settings:** independent Day-before and At-time reminder switches, plus Edit regimen.
-- **Edit regimen:** same fields as setup. Frequency or start (anchor) changes recalculate the upcoming date; past logs are not rewritten.
+- **Edit regimen:** same fields as setup. Past logs are not rewritten. A start (anchor) change moves the upcoming date to the first slot on the new cadence after the last log; a frequency-only change makes it last log + the new interval.
 
 Reminders: day-before fires at the same clock as the injection minus 24 hours; at-time fires at `nextInjectionAt`. They are scheduled with `AlarmManager` and restored after reboot.
 
