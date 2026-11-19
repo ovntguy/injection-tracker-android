@@ -84,6 +84,7 @@ fun LogDoneScreen(
         onTimeChange = viewModel::updateTime,
         onSiteSelected = viewModel::selectSite,
         onSave = viewModel::save,
+        maxDate = viewModel.today(),
     )
 }
 
@@ -98,6 +99,7 @@ fun LogDoneContent(
     onSave: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
     scrollState: ScrollState = rememberScrollState(),
+    maxDate: LocalDate? = null,
 ) {
     Scaffold(
         topBar = {
@@ -141,7 +143,15 @@ fun LogDoneContent(
                             time = state.time,
                             onDateChange = onDateChange,
                             onTimeChange = onTimeChange,
+                            maxDate = maxDate,
                         )
+                        if (state.inFuture) {
+                            Text(
+                                stringResource(R.string.log_done_future_error),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
                         Text(
                             stringResource(R.string.log_done_tap_site),
                             style = MaterialTheme.typography.titleMedium,

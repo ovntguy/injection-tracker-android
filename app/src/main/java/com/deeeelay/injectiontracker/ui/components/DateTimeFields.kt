@@ -7,11 +7,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -44,6 +46,8 @@ fun DateTimeFields(
     dateLabel: String = stringResource(R.string.field_date),
     timeLabel: String = stringResource(R.string.field_time),
     modifier: Modifier = Modifier,
+    /** Latest date the picker allows, or null for no limit. */
+    maxDate: LocalDate? = null,
 ) {
     var showDate by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
@@ -88,6 +92,12 @@ fun DateTimeFields(
     if (showDate) {
         val state = rememberDatePickerState(
             initialSelectedDateMillis = date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+            yearRange = if (maxDate != null) {
+                DatePickerDefaults.YearRange.first..maxDate.year
+            } else {
+                DatePickerDefaults.YearRange
+            },
+            selectableDates = remember(maxDate) { notAfter(maxDate) },
         )
         DatePickerDialog(
             onDismissRequest = { showDate = false },
@@ -137,6 +147,16 @@ fun DateTimeFields(
             text = { TimePicker(state = state) },
         )
     }
+}
+
+/** Picker dates arrive as UTC midnight millis; compare them as local dates. */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun notAfter(maxDate: LocalDate?): SelectableDates = object : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+        maxDate == null ||
+            !Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate().isAfter(maxDate)
+
+    override fun isSelectableYear(year: Int): Boolean = maxDate == null || year <= maxDate.year
 }
 
 fun combineLocalDateTime(
