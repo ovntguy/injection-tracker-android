@@ -65,6 +65,7 @@ class TrackerRepository(
         scheduler.reschedule(next, flags.dayBeforeEnabled, flags.atTimeEnabled)
     }
 
+    /** Marks the currently due dose as missed; the log records when it was marked. */
     suspend fun logMissed(loggedAt: Instant = now()) {
         val current = prefs.current().regimen ?: return
         val log = InjectionLog(
@@ -74,7 +75,7 @@ class TrackerRepository(
             site = null,
         )
         logDao.insert(log.toEntity())
-        val next = Scheduling.nextAfterTerminalLog(loggedAt, current.frequency)
+        val next = Scheduling.nextAfterMissed(current.nextInjectionAt, loggedAt, current.frequency)
         prefs.updateNextInjectionAt(next)
         val flags = prefs.current()
         scheduler.reschedule(next, flags.dayBeforeEnabled, flags.atTimeEnabled)

@@ -46,7 +46,7 @@
     <string name="log_readout_last_time">Last time: %1$s · %2$s</string>
 
     <string name="missed_title">Mark as missed?</string>
-    <string name="missed_body">Your next dose will be scheduled from now, not the original due time. No site is recorded.</string>
+    <string name="missed_body">Your next dose stays on schedule, one interval after the dose you missed. No site is recorded.</string>
 
     <string name="calendar_title">Calendar</string>
     <string name="calendar_done">Done</string>
