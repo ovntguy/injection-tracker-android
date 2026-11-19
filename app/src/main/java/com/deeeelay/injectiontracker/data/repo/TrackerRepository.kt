@@ -4,6 +4,7 @@ import com.deeeelay.injectiontracker.data.local.InjectionLogDao
 import com.deeeelay.injectiontracker.data.local.toDomain
 import com.deeeelay.injectiontracker.data.local.toEntity
 import com.deeeelay.injectiontracker.data.prefs.TrackerPreferences
+import com.deeeelay.injectiontracker.domain.Frequency
 import com.deeeelay.injectiontracker.domain.InjectionLog
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.LogType
@@ -36,7 +37,7 @@ class TrackerRepository(
     suspend fun saveSetup(
         medicineName: String,
         dosage: String,
-        frequency: com.deeeelay.injectiontracker.domain.Frequency,
+        frequency: Frequency,
         startDateTime: Instant,
     ) {
         val regimen = Regimen(
@@ -84,7 +85,7 @@ class TrackerRepository(
     suspend fun updateRegimen(
         medicineName: String,
         dosage: String,
-        frequency: com.deeeelay.injectiontracker.domain.Frequency,
+        frequency: Frequency,
         startDateTime: Instant,
     ) {
         val current = prefs.current()

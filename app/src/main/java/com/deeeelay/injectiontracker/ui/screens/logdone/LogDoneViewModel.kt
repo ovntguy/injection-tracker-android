@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deeeelay.injectiontracker.data.repo.TrackerRepository
 import com.deeeelay.injectiontracker.domain.InjectionSite
-import com.deeeelay.injectiontracker.domain.LogType
 import com.deeeelay.injectiontracker.ui.components.combineLocalDateTime
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -45,9 +44,7 @@ class LogDoneViewModel(
         viewModelScope.launch {
             repository.snapshot.collect { snap ->
                 // Last site = most recent DONE log; Missed never moves it.
-                val lastDone = snap.logs
-                    .filter { it.type == LogType.DONE && it.site != null }
-                    .maxByOrNull { it.loggedAt }
+                val lastDone = snap.lastDoneLog
                 _state.update { it.copy(lastSite = lastDone?.site, lastSiteAt = lastDone?.loggedAt) }
             }
         }

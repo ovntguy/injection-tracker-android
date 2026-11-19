@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.deeeelay.injectiontracker.data.repo.TrackerRepository
 import com.deeeelay.injectiontracker.domain.Frequency
 import com.deeeelay.injectiontracker.domain.InjectionSite
-import com.deeeelay.injectiontracker.domain.Scheduling
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.SharingStarted
@@ -22,7 +21,6 @@ data class HomeUiState(
     val dosage: String = "",
     val frequency: Frequency = Frequency.EVERY_WEEK,
     val nextInjectionAt: Instant? = null,
-    val overdue: Boolean = false,
     val lastSite: InjectionSite? = null,
     /** When [lastSite] was logged (last done log, never a miss). */
     val lastSiteAt: Instant? = null,
@@ -42,7 +40,6 @@ class HomeViewModel(
                 dosage = regimen?.dosage.orEmpty(),
                 frequency = regimen?.frequency ?: Frequency.EVERY_WEEK,
                 nextInjectionAt = regimen?.nextInjectionAt,
-                overdue = regimen?.let { Scheduling.isOverdue(it.nextInjectionAt, Instant.now()) } == true,
                 lastSite = snap.lastDoneSite,
                 lastSiteAt = snap.lastDoneLog?.loggedAt,
             )

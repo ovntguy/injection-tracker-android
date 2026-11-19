@@ -130,7 +130,6 @@ class TrackerPreferences(context: Context) {
         val NEXT_AT = longPreferencesKey("next_at")
         val DAY_BEFORE = booleanPreferencesKey("day_before")
         val AT_TIME = booleanPreferencesKey("at_time")
-        val LAST_SITE = stringPreferencesKey("last_site")
         val LR_SWAP_V11 = booleanPreferencesKey("lr_swap_v11")
     }
 }
