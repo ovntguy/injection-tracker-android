@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
@@ -18,6 +19,8 @@ import kotlinx.coroutines.launch
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+
+private const val TAG = "ReminderReceiver"
 
 class ReminderReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -67,6 +70,8 @@ class ReminderReceiver : BroadcastReceiver() {
                 if (NotificationManagerCompat.from(context).areNotificationsEnabled()) {
                     NotificationManagerCompat.from(context).notify(id, notification)
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Reminder failed", e)
             } finally {
                 pending.finish()
             }

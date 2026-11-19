@@ -27,7 +27,7 @@ class TrackerRepository(
         TrackerSnapshot(
             setupComplete = pref.setupComplete,
             regimen = pref.regimen,
-            logs = logs.map { it.toDomain() },
+            logs = logs.mapNotNull { it.toDomain() },
             dayBeforeEnabled = pref.dayBeforeEnabled,
             atTimeEnabled = pref.atTimeEnabled,
         )

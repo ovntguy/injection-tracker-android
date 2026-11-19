@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deeeelay.injectiontracker.R
+import com.deeeelay.injectiontracker.ui.components.SaveFailedToast
 import com.deeeelay.injectiontracker.ui.components.DateTimeFields
 import com.deeeelay.injectiontracker.ui.components.FrequencyDropdown
 
@@ -37,6 +38,7 @@ fun SetupScreen(
     LaunchedEffect(state.saved) {
         if (state.saved) onSaved()
     }
+    SaveFailedToast(state.saveFailed, onShown = viewModel::clearSaveFailed)
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.setup_title)) }) },

@@ -25,6 +25,11 @@ class AppContainer(context: Context) {
         scheduler = scheduler,
     )
     val viewModelFactory = InjectionViewModelFactory(repository)
+
+    /** Opens the database (running any pending migration) off the main thread. */
+    fun openDatabase() {
+        database.openHelper.writableDatabase
+    }
 }
 
 class InjectionViewModelFactory(

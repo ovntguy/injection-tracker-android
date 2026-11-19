@@ -5,10 +5,13 @@ import android.app.AlarmManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import com.deeeelay.injectiontracker.InjectionTrackerApp
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+
+private const val TAG = "BootReceiver"
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
@@ -18,6 +21,8 @@ class BootReceiver : BroadcastReceiver() {
             try {
                 val app = context.applicationContext as InjectionTrackerApp
                 app.container.repository.rescheduleFromStorage()
+            } catch (e: Exception) {
+                Log.e(TAG, "Reschedule failed", e)
             } finally {
                 pending.finish()
             }

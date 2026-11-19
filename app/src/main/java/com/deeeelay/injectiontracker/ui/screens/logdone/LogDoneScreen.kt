@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deeeelay.injectiontracker.R
+import com.deeeelay.injectiontracker.ui.components.SaveFailedToast
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.ZoneReadout
 import com.deeeelay.injectiontracker.ui.components.DateTimeFields
@@ -77,6 +78,7 @@ fun LogDoneScreen(
     LaunchedEffect(state.saved) {
         if (state.saved) onBack()
     }
+    SaveFailedToast(state.saveFailed, onShown = viewModel::clearSaveFailed)
     LogDoneContent(
         state = state,
         onBack = onBack,

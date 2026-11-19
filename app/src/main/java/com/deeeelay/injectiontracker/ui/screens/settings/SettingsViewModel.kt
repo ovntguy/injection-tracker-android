@@ -1,9 +1,11 @@
 package com.deeeelay.injectiontracker.ui.screens.settings
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.deeeelay.injectiontracker.data.repo.TrackerRepository
 import com.deeeelay.injectiontracker.domain.Frequency
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -35,6 +37,8 @@ data class ReminderSwitches(val dayBefore: Boolean, val atTime: Boolean, val ena
     }
 }
 
+private const val TAG = "SettingsViewModel"
+
 class SettingsViewModel(
     private val repository: TrackerRepository,
 ) : ViewModel() {
@@ -48,11 +52,18 @@ class SettingsViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), SettingsUiState())
 
-    fun setDayBefore(enabled: Boolean) {
-        viewModelScope.launch { repository.setDayBeforeEnabled(enabled) }
-    }
+    fun setDayBefore(enabled: Boolean) = launchLogged { repository.setDayBeforeEnabled(enabled) }
 
-    fun setAtTime(enabled: Boolean) {
-        viewModelScope.launch { repository.setAtTimeEnabled(enabled) }
+    fun setAtTime(enabled: Boolean) = launchLogged { repository.setAtTimeEnabled(enabled) }
+
+    private fun launchLogged(block: suspend () -> Unit) {
+        viewModelScope.launch {
+            try {
+                block()
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                Log.e(TAG, "Reminder setting failed", e)
+            }
+        }
     }
 }

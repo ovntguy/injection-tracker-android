@@ -44,6 +44,5 @@ abstract class AppDatabase : RoomDatabase() {
             Room.databaseBuilder(context, AppDatabase::class.java, "injection-tracker.db")
                 .addMigrations(MIGRATION_1_2)
                 .build()
-                .also { it.openHelper.writableDatabase }
     }
 }

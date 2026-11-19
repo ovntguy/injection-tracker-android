@@ -147,9 +147,8 @@ fun HomeScreen(
         ) {
             MissedSheetContent(
                 onConfirm = {
-                    viewModel.logMissed()
+                    if (viewModel.logMissed()) onMissedLogged()
                     showMissed = false
-                    onMissedLogged()
                 },
                 onCancel = { showMissed = false },
             )

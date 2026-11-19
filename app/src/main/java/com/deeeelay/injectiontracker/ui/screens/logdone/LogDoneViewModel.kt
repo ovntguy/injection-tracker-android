@@ -6,6 +6,7 @@ import com.deeeelay.injectiontracker.data.repo.TrackerRepository
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.LogType
 import com.deeeelay.injectiontracker.ui.components.combineLocalDateTime
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -26,6 +27,7 @@ data class LogDoneState(
     val saved: Boolean = false,
     /** The picked date and time are later than now; a shot can't be logged ahead of time. */
     val inFuture: Boolean = false,
+    val saveFailed: Boolean = false,
 ) {
     /** Save is enabled as soon as a zone is picked; date and time are already defaulted. */
     val canSave: Boolean get() = site != null && !saving && !saved && !inFuture
@@ -66,13 +68,20 @@ class LogDoneViewModel(
         _state.value = current
         if (!current.canSave) return
         val site = current.site ?: return
+        _state.update { it.copy(saving = true) }
         viewModelScope.launch {
-            _state.update { it.copy(saving = true) }
-            repository.logDone(
-                loggedAt = combineLocalDateTime(current.date, current.time, zone),
-                site = site,
-            )
-            _state.update { it.copy(saving = false, saved = true) }
+            try {
+                repository.logDone(
+                    loggedAt = combineLocalDateTime(current.date, current.time, zone),
+                    site = site,
+                )
+                _state.update { it.copy(saving = false, saved = true) }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                _state.update { it.copy(saving = false, saveFailed = true) }
+            }
         }
     }
+
+    fun clearSaveFailed() = _state.update { it.copy(saveFailed = false) }
 }

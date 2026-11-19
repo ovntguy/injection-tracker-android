@@ -40,6 +40,7 @@
 
     <string name="log_done_title">Log injection</string>
     <string name="log_done_tap_site">Tap where you injected</string>
+    <string name="error_save_failed">Couldn\'t save. Please try again.</string>
     <string name="log_done_future_error">That time is in the future. Pick a time up to now.</string>
     <string name="silhouette_side_right">R</string>
     <string name="silhouette_side_left">L</string>
