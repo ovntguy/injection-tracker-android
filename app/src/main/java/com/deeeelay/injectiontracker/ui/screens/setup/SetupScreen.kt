@@ -1,5 +1,10 @@
 package com.deeeelay.injectiontracker.ui.screens.setup
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -20,8 +25,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deeeelay.injectiontracker.R
 import com.deeeelay.injectiontracker.ui.components.SaveFailedToast
@@ -39,6 +46,19 @@ fun SetupScreen(
         if (state.saved) onSaved()
     }
     SaveFailedToast(state.saveFailed, onShown = viewModel::clearSaveFailed)
+    val context = LocalContext.current
+    // The result needs no handling: Home re-checks notification access on resume.
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { }
+    val saveAndAskForNotifications = {
+        val needsAsk = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        val valid = state.medicineName.isNotBlank() && state.dosage.isNotBlank()
+        if (needsAsk && valid) notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        viewModel.save()
+    }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(stringResource(R.string.setup_title)) }) },
@@ -96,7 +116,7 @@ fun SetupScreen(
             )
             Spacer(Modifier.height(8.dp))
             Button(
-                onClick = viewModel::save,
+                onClick = saveAndAskForNotifications,
                 enabled = !state.saving,
                 modifier = Modifier.fillMaxWidth(),
             ) {

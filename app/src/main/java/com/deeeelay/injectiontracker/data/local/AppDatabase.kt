@@ -11,7 +11,7 @@ import com.deeeelay.injectiontracker.domain.SiteIdLrSwap
 @Database(
     entities = [InjectionLogEntity::class],
     version = 2,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun logDao(): InjectionLogDao

@@ -1,5 +1,6 @@
 package com.deeeelay.injectiontracker.ui.components
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.deeeelay.injectiontracker.R
@@ -49,6 +51,7 @@ fun DateTimeFields(
     /** Latest date the picker allows, or null for no limit. */
     maxDate: LocalDate? = null,
 ) {
+    val context = LocalContext.current
     var showDate by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
@@ -127,7 +130,7 @@ fun DateTimeFields(
         val state = rememberTimePickerState(
             initialHour = time.hour,
             initialMinute = time.minute,
-            is24Hour = false,
+            is24Hour = DateFormat.is24HourFormat(context),
         )
         AlertDialog(
             onDismissRequest = { showTime = false },
