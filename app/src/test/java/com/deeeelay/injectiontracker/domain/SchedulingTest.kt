@@ -38,31 +38,12 @@ class SchedulingTest {
     }
 
     @Test
-    fun lateMissKeepsCadenceFromOriginalDue() {
-        val missMarkedAt = t0.plus(Duration.ofDays(2))
-        val next = Scheduling.nextAfterMissed(t0, missMarkedAt, Frequency.EVERY_OTHER_WEEK)
-        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(14)))
-    }
-
-    @Test
-    fun earlyMissSkipsThatDoseWithoutPullingTheScheduleEarlier() {
-        val missMarkedAt = t0.minus(Duration.ofDays(5))
-        val next = Scheduling.nextAfterMissed(t0, missMarkedAt, Frequency.EVERY_WEEK)
-        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(7)))
-    }
-
-    @Test
-    fun missMarkedMoreThanAnIntervalLateJumpsToNextFutureSlot() {
-        val missMarkedAt = t0.plus(Duration.ofDays(9))
-        val next = Scheduling.nextAfterMissed(t0, missMarkedAt, Frequency.EVERY_WEEK)
-        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(14)))
-    }
-
-    @Test
-    fun missMarkedExactlyOneIntervalLateMovesPastNow() {
-        val missMarkedAt = t0.plus(Duration.ofDays(7))
-        val next = Scheduling.nextAfterMissed(t0, missMarkedAt, Frequency.EVERY_WEEK)
-        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(14)))
+    fun missedLogUsesMissTimeNotOriginalDue() {
+        val originalDue = t0
+        val missLoggedAt = t0.plus(Duration.ofDays(2))
+        val next = Scheduling.nextAfterTerminalLog(missLoggedAt, Frequency.EVERY_OTHER_WEEK)
+        assertThat(next).isEqualTo(missLoggedAt.plus(Duration.ofDays(14)))
+        assertThat(next).isNotEqualTo(originalDue.plus(Duration.ofDays(14)))
     }
 
     @Test

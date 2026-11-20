@@ -29,7 +29,7 @@ Install the debug APK from `app/build/outputs/apk/debug/`.
 - **Setup once:** medicine name, dosage (free text), frequency (**Every week** | **Every other week**), start date and time. Next injection starts at that date/time. Both reminders default **on**.
 - **Home:** next shot (with Overdue when due time has passed), last site as a single period-sized primary dot on the frontal silhouette, **Log injection**, **I missed it**.
 - **Log done:** editable date/time (defaults to now) and one of 18 frontal zones (3 bands on each upper arm, abdomen side, and upper thigh). Next due = log time + 7 or 14 days.
-- **Log missed:** confirmation sheet, no site. Next due = missed due time + interval, skipping ahead by whole intervals if that is already past, so the schedule keeps its cadence.
+- **Log missed:** confirmation sheet, no site. Next due = now + interval (not the original due time).
 - **Calendar:** past actual logs plus the next upcoming mark (completed circle, missed diamond, upcoming outline).
 - **Settings:** independent Day-before and At-time reminder switches, plus Edit regimen.
 - **Edit regimen:** same fields as setup. Past logs are not rewritten. A start (anchor) change moves the upcoming date to the first slot on the new cadence after the last log; a frequency-only change makes it last log + the new interval.
@@ -45,4 +45,4 @@ The 18 zone ids and cx/cy positions are locked in `app/src/main/assets/silhouett
 
 ## Tests
 
-Unit tests cover scheduling math (interval, done advancing from the log timestamp, missed keeping the cadence, regimen recalculation, day-before = due − 24h) and the locked zone coordinates.
+Unit tests cover scheduling math (interval, done/missed advancing from the terminal log timestamp, regimen recalculation, day-before = due − 24h) and the locked zone coordinates.
