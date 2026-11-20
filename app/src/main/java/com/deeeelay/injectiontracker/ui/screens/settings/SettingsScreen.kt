@@ -1,11 +1,7 @@
 package com.deeeelay.injectiontracker.ui.screens.settings
 
-import android.Manifest
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.provider.Settings
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -37,12 +33,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deeeelay.injectiontracker.R
+import com.deeeelay.injectiontracker.ui.components.areNotificationsEnabled
 import com.deeeelay.injectiontracker.ui.components.frequencyLabel
 
 @Composable
@@ -190,16 +186,4 @@ private fun SectionLabel(text: Int) {
             .fillMaxWidth()
             .padding(start = 16.dp, top = 24.dp, bottom = 8.dp),
     )
-}
-
-private fun areNotificationsEnabled(context: Context): Boolean {
-    val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    if (!manager.areNotificationsEnabled()) return false
-    if (Build.VERSION.SDK_INT >= 33) {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-    return true
 }

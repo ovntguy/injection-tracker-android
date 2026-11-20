@@ -4,6 +4,7 @@ import com.deeeelay.injectiontracker.data.local.InjectionLogDao
 import com.deeeelay.injectiontracker.data.local.toDomain
 import com.deeeelay.injectiontracker.data.local.toEntity
 import com.deeeelay.injectiontracker.data.prefs.TrackerPreferences
+import com.deeeelay.injectiontracker.domain.Frequency
 import com.deeeelay.injectiontracker.domain.InjectionLog
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.LogType
@@ -27,7 +28,7 @@ class TrackerRepository(
         TrackerSnapshot(
             setupComplete = pref.setupComplete,
             regimen = pref.regimen,
-            logs = logs.map { it.toDomain() },
+            logs = logs.mapNotNull { it.toDomain() },
             dayBeforeEnabled = pref.dayBeforeEnabled,
             atTimeEnabled = pref.atTimeEnabled,
         )
@@ -36,7 +37,7 @@ class TrackerRepository(
     suspend fun saveSetup(
         medicineName: String,
         dosage: String,
-        frequency: com.deeeelay.injectiontracker.domain.Frequency,
+        frequency: Frequency,
         startDateTime: Instant,
     ) {
         val regimen = Regimen(
@@ -83,17 +84,16 @@ class TrackerRepository(
     suspend fun updateRegimen(
         medicineName: String,
         dosage: String,
-        frequency: com.deeeelay.injectiontracker.domain.Frequency,
+        frequency: Frequency,
         startDateTime: Instant,
     ) {
         val current = prefs.current()
         val old = current.regimen ?: return
         val lastLogAt = logDao.getAll().maxByOrNull { it.loggedAtEpochMillis }
             ?.let { Instant.ofEpochMilli(it.loggedAtEpochMillis) }
-        val frequencyOrAnchorChanged =
-            frequency != old.frequency || startDateTime != old.startDateTime
-        val next = if (frequencyOrAnchorChanged) {
-            Scheduling.nextAfterRegimenEdit(startDateTime, lastLogAt, frequency)
+        val anchorChanged = startDateTime != old.startDateTime
+        val next = if (anchorChanged || frequency != old.frequency) {
+            Scheduling.nextAfterRegimenEdit(startDateTime, lastLogAt, frequency, anchorChanged)
         } else {
             old.nextInjectionAt
         }

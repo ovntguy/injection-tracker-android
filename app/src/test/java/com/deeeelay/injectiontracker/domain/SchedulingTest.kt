@@ -67,6 +67,49 @@ class SchedulingTest {
     }
 
     @Test
+    fun anchorEditSkipsCadenceSlotsSoonerThanOneIntervalAfterLastLog() {
+        val lastLog = t0
+        // Cadence slots at -15, -8, -1, +6, +13 days from the last log. +6 is less than a full
+        // week after the injection, so the next dose is +13.
+        val newStart = t0.minus(Duration.ofDays(15))
+        val next = Scheduling.nextAfterRegimenEdit(newStart, lastLog, Frequency.EVERY_WEEK, anchorChanged = true)
+        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(13)))
+    }
+
+    @Test
+    fun anchorEditSoonAfterLastLogIsPushedToAFullIntervalOut() {
+        // Biweekly, last shot t0, new start 3 days later: never due before t0 + 14 days.
+        val newStart = t0.plus(Duration.ofDays(3))
+        val next = Scheduling.nextAfterRegimenEdit(newStart, t0, Frequency.EVERY_OTHER_WEEK, anchorChanged = true)
+        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(17)))
+    }
+
+    @Test
+    fun anchorEditAtLeastOneIntervalAfterLastLogUsesNewStart() {
+        val newStart = t0.plus(Duration.ofDays(20))
+        val next = Scheduling.nextAfterRegimenEdit(newStart, t0, Frequency.EVERY_OTHER_WEEK, anchorChanged = true)
+        assertThat(next).isEqualTo(newStart)
+    }
+
+    @Test
+    fun anchorEditNeverSchedulesSoonerThanOneIntervalAfterLastLog() {
+        val step = Duration.ofDays(14)
+        for (offsetHours in -400L..400L step 7) {
+            val newStart = t0.plus(Duration.ofHours(offsetHours))
+            val next = Scheduling.nextAfterRegimenEdit(newStart, t0, Frequency.EVERY_OTHER_WEEK, anchorChanged = true)
+            assertThat(next).isAtLeast(t0.plus(step))
+            assertThat(next).isLessThan(t0.plus(step).plus(step))
+        }
+    }
+
+    @Test
+    fun anchorEditLandingExactlyOnLastLogMovesOneInterval() {
+        val newStart = t0.minus(Duration.ofDays(14))
+        val next = Scheduling.nextAfterRegimenEdit(newStart, t0, Frequency.EVERY_WEEK, anchorChanged = true)
+        assertThat(next).isEqualTo(t0.plus(Duration.ofDays(7)))
+    }
+
+    @Test
     fun dayBeforeReminderIsSameClockMinus24Hours() {
         val next = LocalDateTime.of(2026, 9, 11, 8, 30).toInstant(ZoneOffset.UTC)
         val reminder = Scheduling.dayBeforeReminderAt(next)

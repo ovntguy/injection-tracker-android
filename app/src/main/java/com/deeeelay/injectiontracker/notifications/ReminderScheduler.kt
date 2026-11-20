@@ -5,6 +5,8 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.deeeelay.injectiontracker.domain.Scheduling
+import java.time.Duration
 import java.time.Instant
 
 class ReminderScheduler(context: Context) {
@@ -17,7 +19,7 @@ class ReminderScheduler(context: Context) {
         if (nextInjectionAt == null) return
         val now = Instant.now()
         if (dayBefore) {
-            val whenAt = com.deeeelay.injectiontracker.domain.Scheduling.dayBeforeReminderAt(nextInjectionAt)
+            val whenAt = Scheduling.dayBeforeReminderAt(nextInjectionAt)
             if (whenAt.isAfter(now)) {
                 setAlarm(REQUEST_DAY_BEFORE, whenAt, TYPE_DAY_BEFORE)
             }
@@ -31,7 +33,15 @@ class ReminderScheduler(context: Context) {
         val pending = pendingIntent(requestCode, type)
         val triggerAt = at.toEpochMilli()
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !alarmManager.canScheduleExactAlarms()) {
-            alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
+            // Exact alarms are denied by default from Android 14. A plain inexact alarm may be
+            // batched with a window proportional to how far away it is (days for a weekly shot),
+            // so bound the delivery window instead. setWindow needs no special permission.
+            alarmManager.setWindow(
+                AlarmManager.RTC_WAKEUP,
+                triggerAt,
+                FALLBACK_WINDOW.toMillis(),
+                pending,
+            )
         } else {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
         }
@@ -62,5 +72,8 @@ class ReminderScheduler(context: Context) {
         const val NOTIFICATION_ID_DAY_BEFORE = 2001
         const val NOTIFICATION_ID_AT_TIME = 2002
         const val CHANNEL_ID = "injection_reminders"
+
+        /** Delivery window when exact alarms are not allowed. */
+        val FALLBACK_WINDOW: Duration = Duration.ofMinutes(10)
     }
 }

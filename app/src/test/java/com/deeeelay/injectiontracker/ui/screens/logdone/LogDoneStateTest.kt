@@ -18,4 +18,10 @@ class LogDoneStateTest {
         assertThat(picked.copy(saving = true).canSave).isFalse()
         assertThat(picked.copy(saved = true).canSave).isFalse()
     }
+
+    @Test
+    fun saveDisabledWhenTimeIsInTheFuture() {
+        val picked = LogDoneState(site = InjectionSite.RIGHT_UPPER_THIGH_MID)
+        assertThat(picked.copy(inFuture = true).canSave).isFalse()
+    }
 }

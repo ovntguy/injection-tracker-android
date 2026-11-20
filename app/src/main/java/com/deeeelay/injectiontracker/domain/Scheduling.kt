@@ -12,20 +12,29 @@ object Scheduling {
         loggedAt.plus(interval(frequency))
 
     /**
-     * Upcoming after a frequency or anchor (start date/time) edit.
-     * Past logs are not rewritten. If any terminal log exists, upcoming is last log + interval;
-     * otherwise upcoming is the (possibly new) start date/time.
+     * Upcoming after a frequency or anchor (start date/time) edit. Past logs are not rewritten.
+     *
+     * - No terminal log yet: upcoming is the (possibly new) start date/time.
+     * - Anchor changed: upcoming is the first slot on the new anchor's cadence
+     *   (start + k × interval, k ≥ 0) that is at least one full interval after the last log.
+     *   The prescribed interval counts from the actual injection, so a dose is never due sooner.
+     * - Only the frequency changed: upcoming is last log + the new interval.
      */
     fun nextAfterRegimenEdit(
         startDateTime: Instant,
         lastTerminalLogAt: Instant?,
         frequency: Frequency,
-    ): Instant =
-        if (lastTerminalLogAt != null) {
-            lastTerminalLogAt.plus(interval(frequency))
-        } else {
-            startDateTime
-        }
+        anchorChanged: Boolean = false,
+    ): Instant {
+        if (lastTerminalLogAt == null) return startDateTime
+        val step = interval(frequency)
+        val earliest = lastTerminalLogAt.plus(step)
+        if (!anchorChanged) return earliest
+        if (!startDateTime.isBefore(earliest)) return startDateTime
+        val gapMillis = Duration.between(startDateTime, earliest).toMillis()
+        val periods = (gapMillis + step.toMillis() - 1) / step.toMillis()
+        return startDateTime.plus(step.multipliedBy(periods))
+    }
 
     fun dayBeforeReminderAt(nextInjectionAt: Instant): Instant =
         nextInjectionAt.minus(Duration.ofHours(24))

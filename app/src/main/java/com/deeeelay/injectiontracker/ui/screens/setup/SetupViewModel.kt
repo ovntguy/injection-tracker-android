@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.deeeelay.injectiontracker.data.repo.TrackerRepository
 import com.deeeelay.injectiontracker.domain.Frequency
 import com.deeeelay.injectiontracker.ui.components.combineLocalDateTime
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +25,7 @@ data class SetupFormState(
     val dosageError: Boolean = false,
     val saving: Boolean = false,
     val saved: Boolean = false,
+    val saveFailed: Boolean = false,
 )
 
 class SetupViewModel(
@@ -40,21 +42,29 @@ class SetupViewModel(
 
     fun save() {
         val current = _state.value
+        if (current.saving || current.saved) return
         val nameBlank = current.medicineName.isBlank()
         val dosageBlank = current.dosage.isBlank()
         if (nameBlank || dosageBlank) {
             _state.update { it.copy(nameError = nameBlank, dosageError = dosageBlank) }
             return
         }
+        _state.update { it.copy(saving = true) }
         viewModelScope.launch {
-            _state.update { it.copy(saving = true) }
-            repository.saveSetup(
-                medicineName = current.medicineName,
-                dosage = current.dosage,
-                frequency = current.frequency,
-                startDateTime = combineLocalDateTime(current.date, current.time, ZoneId.systemDefault()),
-            )
-            _state.update { it.copy(saving = false, saved = true) }
+            try {
+                repository.saveSetup(
+                    medicineName = current.medicineName,
+                    dosage = current.dosage,
+                    frequency = current.frequency,
+                    startDateTime = combineLocalDateTime(current.date, current.time, ZoneId.systemDefault()),
+                )
+                _state.update { it.copy(saving = false, saved = true) }
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                _state.update { it.copy(saving = false, saveFailed = true) }
+            }
         }
     }
+
+    fun clearSaveFailed() = _state.update { it.copy(saveFailed = false) }
 }

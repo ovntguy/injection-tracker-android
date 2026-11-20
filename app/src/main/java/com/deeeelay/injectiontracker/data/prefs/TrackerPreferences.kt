@@ -92,14 +92,14 @@ class TrackerPreferences(context: Context) {
         val setup = this[Keys.SETUP_COMPLETE] == true
         val name = this[Keys.MEDICINE_NAME]
         val dosage = this[Keys.DOSAGE]
-        val freqRaw = this[Keys.FREQUENCY]
+        val frequency = Frequency.entries.find { it.name == this[Keys.FREQUENCY] }
         val start = this[Keys.START_AT]
         val next = this[Keys.NEXT_AT]
-        val regimen = if (setup && name != null && dosage != null && freqRaw != null && start != null && next != null) {
+        val regimen = if (setup && name != null && dosage != null && frequency != null && start != null && next != null) {
             Regimen(
                 medicineName = name,
                 dosage = dosage,
-                frequency = Frequency.valueOf(freqRaw),
+                frequency = frequency,
                 startDateTime = Instant.ofEpochMilli(start),
                 nextInjectionAt = Instant.ofEpochMilli(next),
             )
@@ -130,7 +130,6 @@ class TrackerPreferences(context: Context) {
         val NEXT_AT = longPreferencesKey("next_at")
         val DAY_BEFORE = booleanPreferencesKey("day_before")
         val AT_TIME = booleanPreferencesKey("at_time")
-        val LAST_SITE = stringPreferencesKey("last_site")
         val LR_SWAP_V11 = booleanPreferencesKey("lr_swap_v11")
     }
 }

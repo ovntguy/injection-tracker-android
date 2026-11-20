@@ -11,7 +11,7 @@ import com.deeeelay.injectiontracker.domain.SiteIdLrSwap
 @Database(
     entities = [InjectionLogEntity::class],
     version = 2,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun logDao(): InjectionLogDao
@@ -44,6 +44,5 @@ abstract class AppDatabase : RoomDatabase() {
             Room.databaseBuilder(context, AppDatabase::class.java, "injection-tracker.db")
                 .addMigrations(MIGRATION_1_2)
                 .build()
-                .also { it.openHelper.writableDatabase }
     }
 }

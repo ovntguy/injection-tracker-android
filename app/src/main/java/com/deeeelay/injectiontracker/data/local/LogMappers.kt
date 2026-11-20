@@ -5,13 +5,16 @@ import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.LogType
 import java.time.Instant
 
-fun InjectionLogEntity.toDomain(): InjectionLog =
-    InjectionLog(
+/** Null for a row whose type this version doesn't know. */
+fun InjectionLogEntity.toDomain(): InjectionLog? {
+    val logType = LogType.entries.find { it.name == type } ?: return null
+    return InjectionLog(
         id = id,
-        type = LogType.valueOf(type),
+        type = logType,
         loggedAt = Instant.ofEpochMilli(loggedAtEpochMillis),
         site = InjectionSite.fromPersistedName(site),
     )
+}
 
 fun InjectionLog.toEntity(): InjectionLogEntity =
     InjectionLogEntity(

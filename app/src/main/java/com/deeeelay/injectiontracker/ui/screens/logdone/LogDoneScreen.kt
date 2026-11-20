@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deeeelay.injectiontracker.R
+import com.deeeelay.injectiontracker.ui.components.SaveFailedToast
 import com.deeeelay.injectiontracker.domain.InjectionSite
 import com.deeeelay.injectiontracker.domain.ZoneReadout
 import com.deeeelay.injectiontracker.ui.components.DateTimeFields
@@ -77,6 +78,7 @@ fun LogDoneScreen(
     LaunchedEffect(state.saved) {
         if (state.saved) onBack()
     }
+    SaveFailedToast(state.saveFailed, onShown = viewModel::clearSaveFailed)
     LogDoneContent(
         state = state,
         onBack = onBack,
@@ -84,6 +86,7 @@ fun LogDoneScreen(
         onTimeChange = viewModel::updateTime,
         onSiteSelected = viewModel::selectSite,
         onSave = viewModel::save,
+        maxDate = viewModel.today(),
     )
 }
 
@@ -98,6 +101,7 @@ fun LogDoneContent(
     onSave: () -> Unit,
     zone: ZoneId = ZoneId.systemDefault(),
     scrollState: ScrollState = rememberScrollState(),
+    maxDate: LocalDate? = null,
 ) {
     Scaffold(
         topBar = {
@@ -141,7 +145,15 @@ fun LogDoneContent(
                             time = state.time,
                             onDateChange = onDateChange,
                             onTimeChange = onTimeChange,
+                            maxDate = maxDate,
                         )
+                        if (state.inFuture) {
+                            Text(
+                                stringResource(R.string.log_done_future_error),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.error,
+                            )
+                        }
                         Text(
                             stringResource(R.string.log_done_tap_site),
                             style = MaterialTheme.typography.titleMedium,

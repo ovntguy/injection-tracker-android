@@ -1,5 +1,6 @@
 package com.deeeelay.injectiontracker.ui.components
 
+import android.text.format.DateFormat
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,11 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
@@ -23,6 +26,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.deeeelay.injectiontracker.R
@@ -44,7 +48,10 @@ fun DateTimeFields(
     dateLabel: String = stringResource(R.string.field_date),
     timeLabel: String = stringResource(R.string.field_time),
     modifier: Modifier = Modifier,
+    /** Latest date the picker allows, or null for no limit. */
+    maxDate: LocalDate? = null,
 ) {
+    val context = LocalContext.current
     var showDate by remember { mutableStateOf(false) }
     var showTime by remember { mutableStateOf(false) }
     val dateFormatter = remember { DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM) }
@@ -88,6 +95,12 @@ fun DateTimeFields(
     if (showDate) {
         val state = rememberDatePickerState(
             initialSelectedDateMillis = date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
+            yearRange = if (maxDate != null) {
+                DatePickerDefaults.YearRange.first..maxDate.year
+            } else {
+                DatePickerDefaults.YearRange
+            },
+            selectableDates = remember(maxDate) { notAfter(maxDate) },
         )
         DatePickerDialog(
             onDismissRequest = { showDate = false },
@@ -117,7 +130,7 @@ fun DateTimeFields(
         val state = rememberTimePickerState(
             initialHour = time.hour,
             initialMinute = time.minute,
-            is24Hour = false,
+            is24Hour = DateFormat.is24HourFormat(context),
         )
         AlertDialog(
             onDismissRequest = { showTime = false },
@@ -137,6 +150,16 @@ fun DateTimeFields(
             text = { TimePicker(state = state) },
         )
     }
+}
+
+/** Picker dates arrive as UTC midnight millis; compare them as local dates. */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun notAfter(maxDate: LocalDate?): SelectableDates = object : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+        maxDate == null ||
+            !Instant.ofEpochMilli(utcTimeMillis).atZone(ZoneOffset.UTC).toLocalDate().isAfter(maxDate)
+
+    override fun isSelectableYear(year: Int): Boolean = maxDate == null || year <= maxDate.year
 }
 
 fun combineLocalDateTime(

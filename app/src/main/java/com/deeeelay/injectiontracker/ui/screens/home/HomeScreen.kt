@@ -1,7 +1,6 @@
 package com.deeeelay.injectiontracker.ui.screens.home
 
 import android.Manifest
-import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -55,6 +54,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.deeeelay.injectiontracker.R
+import com.deeeelay.injectiontracker.ui.components.areNotificationsEnabled
 import com.deeeelay.injectiontracker.domain.NextShotRelative
 import com.deeeelay.injectiontracker.domain.ZoneReadout
 import com.deeeelay.injectiontracker.ui.components.Formatters
@@ -147,9 +147,8 @@ fun HomeScreen(
         ) {
             MissedSheetContent(
                 onConfirm = {
-                    viewModel.logMissed()
+                    if (viewModel.logMissed()) onMissedLogged()
                     showMissed = false
-                    onMissedLogged()
                 },
                 onCancel = { showMissed = false },
             )
@@ -424,16 +423,4 @@ fun rememberHomeNow(): Instant {
         }
     }
     return now
-}
-
-private fun areNotificationsEnabled(context: Context): Boolean {
-    val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    if (!manager.areNotificationsEnabled()) return false
-    if (Build.VERSION.SDK_INT >= 33) {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.POST_NOTIFICATIONS,
-        ) == PackageManager.PERMISSION_GRANTED
-    }
-    return true
 }
