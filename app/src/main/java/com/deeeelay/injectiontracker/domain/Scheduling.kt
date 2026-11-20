@@ -16,7 +16,8 @@ object Scheduling {
      *
      * - No terminal log yet: upcoming is the (possibly new) start date/time.
      * - Anchor changed: upcoming is the first slot on the new anchor's cadence
-     *   (start + k × interval, k ≥ 0) after the last log, so "my shots are on Thursdays" works.
+     *   (start + k × interval, k ≥ 0) that is at least one full interval after the last log.
+     *   The prescribed interval counts from the actual injection, so a dose is never due sooner.
      * - Only the frequency changed: upcoming is last log + the new interval.
      */
     fun nextAfterRegimenEdit(
@@ -26,10 +27,12 @@ object Scheduling {
         anchorChanged: Boolean = false,
     ): Instant {
         if (lastTerminalLogAt == null) return startDateTime
-        if (!anchorChanged) return lastTerminalLogAt.plus(interval(frequency))
-        if (startDateTime.isAfter(lastTerminalLogAt)) return startDateTime
         val step = interval(frequency)
-        val periods = Duration.between(startDateTime, lastTerminalLogAt).toMillis() / step.toMillis() + 1
+        val earliest = lastTerminalLogAt.plus(step)
+        if (!anchorChanged) return earliest
+        if (!startDateTime.isBefore(earliest)) return startDateTime
+        val gapMillis = Duration.between(startDateTime, earliest).toMillis()
+        val periods = (gapMillis + step.toMillis() - 1) / step.toMillis()
         return startDateTime.plus(step.multipliedBy(periods))
     }
 
